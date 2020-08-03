@@ -1,0 +1,142 @@
+.crit {
+    display: flex;
+    padding: 0.5rem 0 0.2rem 1rem; /* padding: 0.6rem 1rem 0.2rem 1rem; */
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    width: 100% !important;
+    cursor: pointer;
+}
+
+.crit:hover {
+    background-color: var(--crit-hover);
+}
+
+.crit .img-container {
+    padding: 0.3rem 0.75rem 0 0;
+}
+
+.img-container img {
+    width: 40px;
+    border-radius: 50%;
+}
+
+.crit .crit-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.crit-container .crit-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.crit-container .crit-info .display_name {
+    margin-right: 0.3rem;
+}
+
+.crit-container .crit-info .display_name:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.crit-container .crit-info .username,
+.crit-container .crit-info .date {
+    font-weight: 500;
+    color: var(--grey);
+}
+
+.separator {
+    margin: 0 0.3rem;
+    color: var(--grey);
+}
+
+.crit-content .crit_text {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--white);
+    white-space: pre-wrap;
+}
+
+.crit-actions {
+    display: flex;
+    margin-top: 0.3rem;
+}
+
+.crit-btn {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--grey);
+    position: relative;
+    right: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 2rem;
+}
+
+.crit-btn .icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    margin-right: 0.5rem;
+    border-radius: 50%;
+}
+
+.crit-btn.more {
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.crit-btn .crit_icon {
+    color: var(--grey);
+}
+
+.crit-btn.recrit:hover .icon-container {
+    background-color: rgba(0, 186, 124, 0.2);
+}
+
+.crit-btn.recrit:hover .crit_icon {
+    color: var(--recrit);
+}
+
+.crit-btn.recrit:hover {
+    color: var(--recrit);
+}
+
+.crit-btn.like:hover .icon-container {
+    background-color: rgba(249, 24, 128, 0.2);
+}
+
+.crit-btn.like:hover .crit_icon {
+    color: var(--like);
+}
+
+.crit-btn.like:hover {
+    color: var(--like);
+}
+
+.crit-btn.comment:hover,
+.crit-btn.share:hover,
+.crit-btn.more:hover,
+.crit-btn.view:hover {
+    color: var(--primary-colour);
+}
+
+.crit-btn.comment:hover .crit_icon,
+.crit-btn.share:hover .crit_icon,
+.crit-btn.more:hover .crit_icon,
+.crit-btn.view:hover .crit_icon {
+    color: var(--primary-colour);
+}
+
+.crit-btn.comment:hover .icon-container,
+.crit-btn.share:hover .icon-container,
+.crit-btn.more:hover .icon-container,
+.crit-btn.view:hover .icon-container {
+    background-color: rgba(29, 155, 240, 0.2);
+}
