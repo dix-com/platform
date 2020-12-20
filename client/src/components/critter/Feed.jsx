@@ -1,40 +1,26 @@
 import "../../styles/Feed.css";
 import Crit from "./Crit";
 
-const Feed = () => {
+const dummyCrit = {
+    _id: "123456789",
+    content: "42+10",
+    createdAt: "Jun 28",
+    author: {
+        displayName: "Elon Musk",
+        username: "elonmusk",
+    },
+    replies: [""],
+    recrits: [""],
+    likes: ["64aadf20e66c076cab2c939d"],
+    views: [""],
+};
+
+const Feed = ({ crits }) => {
     return (
         <section id="feed">
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
-            <Crit />
+            {[...Array(10)].map((_, idx) => (
+                <Crit key={dummyCrit._id} crit={dummyCrit} />
+            ))}
         </section>
     );
 };

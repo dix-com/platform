@@ -62,7 +62,8 @@
 
 .crit-actions {
     display: flex;
-    margin-top: 0.3rem;
+    margin-top: 0.4rem;
+    margin-bottom: 0.2rem;
 }
 
 .crit-btn {
@@ -75,6 +76,22 @@
     justify-content: center;
     align-items: center;
     margin-right: 2rem;
+    transition: all 0.2s ease-out;
+}
+
+.crit-btn.comment.applied .crit_icon,
+.crit-btn.comment.applied p {
+    color: var(--primary-colour);
+}
+
+.crit-btn.recrit.applied .crit_icon,
+.crit-btn.recrit.applied p {
+    color: var(--recrit);
+}
+
+.crit-btn.like.applied .crit_icon,
+.crit-btn.like.applied p {
+    color: var(--like);
 }
 
 .crit-btn .icon-container {
@@ -85,6 +102,7 @@
     height: 30px;
     margin-right: 0.5rem;
     border-radius: 50%;
+    transition: all 0.2s ease-out;
 }
 
 .crit-btn.more {
