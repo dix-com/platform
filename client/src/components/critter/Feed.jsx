@@ -19,7 +19,7 @@ const Feed = ({ crits }) => {
     return (
         <section id="feed">
             {[...Array(10)].map((_, idx) => (
-                <Crit key={dummyCrit._id} crit={dummyCrit} />
+                <Crit key={idx} crit={dummyCrit} />
             ))}
         </section>
     );

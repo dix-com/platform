@@ -112,7 +112,7 @@ const Crit = ({ crit }) => {
                     <button className="crit-btn view" disabled={!user} onClick={handleShare}>
                         <div className="icon-container">
                             <IconContext.Provider value={{ className: "crit_icon" }}>
-                                <IoMdStats size="19" />
+                                <IoMdStats size="18" />
                             </IconContext.Provider>
                         </div>
                         <p>{crit.views.length}</p>
