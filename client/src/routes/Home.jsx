@@ -1,7 +1,6 @@
 import "../styles/App.css";
 
 import { useState } from "react";
-
 import { ColumnHeader, Links, Feed, CritInput, TabList } from "../components";
 
 const EmptyFeed = () => {
@@ -32,7 +31,6 @@ const Home = () => {
                     />
                 </ColumnHeader>
 
-                {/* <CritInput maxLength={280} /> */}
                 <Feed
                     crits={[]}
                     NotFoundComponent={<EmptyFeed />}
