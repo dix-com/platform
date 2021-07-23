@@ -1,8 +1,7 @@
-const { ObjectId } = require("mongodb");
-let mongoose = require("mongoose");
-let Schema = mongoose.Schema;
+const mongoose = require("mongoose");
 
-// TODO: INDEXING
+const Schema = mongoose.Schema;
+const ObjectId = Schema.Types.ObjectId;
 
 const critSchema = new Schema(
     {
@@ -18,11 +17,10 @@ const critSchema = new Schema(
             },
         },
         author: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: ObjectId,
             ref: "User",
             required: true,
         },
-        // add array structure for more than 1 media per crit
         media: [
             {
                 url: {
@@ -32,8 +30,8 @@ const critSchema = new Schema(
                 mediaType: {
                     type: String,
                     required: true,
-                    // enum: ["image", "gif"],
-                    // message: "Invalid media type.",
+                    enum: ["image", "gif"],
+                    message: "Invalid media type.",
                 },
             },
         ],
@@ -56,28 +54,28 @@ const critSchema = new Schema(
             default: "EVERYONE",
         },
         recritId: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: ObjectId,
             ref: "Crit",
         },
         inReplyTo: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: ObjectId,
             ref: "Crit",
         },
         likes: [
             {
-                type: mongoose.Schema.Types.ObjectId,
+                type: ObjectId,
                 ref: "User",
             },
         ],
         recrits: [
             {
-                type: mongoose.Schema.Types.ObjectId,
+                type: ObjectId,
                 ref: "User",
             },
         ],
         replies: [
             {
-                type: mongoose.Schema.Types.ObjectId,
+                type: ObjectId,
                 ref: "Crit",
             },
         ],
