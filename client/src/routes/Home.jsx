@@ -3,6 +3,8 @@ import "../styles/App.css";
 import { useState } from "react";
 import { ColumnHeader, Links, Feed, CritInput, TabList } from "../components";
 
+const tabs = ["For you", "Following"];
+
 const EmptyFeed = () => {
     return (
         <div className="not-found-container">
@@ -27,10 +29,11 @@ const Home = () => {
                     <TabList
                         activeTab={tab}
                         setActiveTab={setTab}
-                        tabs={["For you", "Following"]}
+                        tabs={tabs}
                     />
                 </ColumnHeader>
 
+                <CritInput maxLength={280} />
                 <Feed
                     crits={[]}
                     NotFoundComponent={<EmptyFeed />}
