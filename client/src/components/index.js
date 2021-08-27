@@ -14,3 +14,4 @@ export { default as TabPanel } from "./shared/TabPanel";
 export { default as Spinner } from "./shared/Spinner";
 export { default as CritInput } from "./inputs/CritInput";
 export { default as CritText } from "./critter/CritText";
+export { default as CritModal } from "./modals/CritModal";

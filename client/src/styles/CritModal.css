@@ -1,0 +1,24 @@
+.crit-modal .modal-content {
+    position: absolute !important;
+    top: 45px;
+    height: auto;
+    max-height: 800px !important;
+    padding: 0.6rem 1rem;
+}
+
+.crit-modal .crit-input {
+    width: 100%;
+    padding: 0;
+}
+
+.crit-modal header {
+    width: 100%;
+    margin-bottom: 0.7rem;
+    align-items: flex-start;
+}
+
+.crit-modal header .header-btn_icon {
+    width: 50px !important;
+    height: 25px;
+    stroke-width: 0px;
+}

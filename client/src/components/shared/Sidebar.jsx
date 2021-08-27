@@ -1,5 +1,6 @@
 import logo from "../../assets/logo-white.png";
 
+import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 
 import { IconContext } from "react-icons";
@@ -21,10 +22,14 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { PiDotsThreeCircle } from "react-icons/pi";
 
+import { CritModal } from "../index";
+
 import { useLazySignOutQuery } from "../../store/api/authApi";
 import { useGetUserInfoQuery } from "../../store/api/userApi";
 
 const Sidebar = ({ minimal, currentUsername }) => {
+    const [critModal, setCritModal] = useState(false);
+
     const { pathname } = useLocation();
     const navigate = useNavigate();
 
@@ -39,6 +44,9 @@ const Sidebar = ({ minimal, currentUsername }) => {
 
     const [signOut] = useLazySignOutQuery();
 
+    const openCritModal = () => setCritModal(true);
+    const closeCritModal = () => setCritModal(false);
+
     const handleSignOut = async () => {
         const result = await signOut();
 
@@ -52,6 +60,11 @@ const Sidebar = ({ minimal, currentUsername }) => {
             className="column"
             id="navbar"
         >
+            <CritModal
+                isOpen={critModal}
+                onClose={closeCritModal}
+            />
+
             <div className="sticky-wrapper">
                 <NavLink
                     to={`/`}
@@ -194,6 +207,7 @@ const Sidebar = ({ minimal, currentUsername }) => {
                             <button
                                 type="button"
                                 className="blue-btn navbar-btn"
+                                onClick={openCritModal}
                             >
                                 <span className="text">Crit</span>
                                 <IconContext.Provider value={{ className: "navbar-btn_icon" }}>
