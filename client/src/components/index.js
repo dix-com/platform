@@ -15,3 +15,4 @@ export { default as Spinner } from "./shared/Spinner";
 export { default as CritInput } from "./inputs/CritInput";
 export { default as CritText } from "./critter/CritText";
 export { default as CritModal } from "./modals/CritModal";
+export { default as FloatOptions } from "./modals/FloatOptions";
