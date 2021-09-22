@@ -1,7 +1,7 @@
 .crit {
     display: flex;
-    padding: 0.5rem 0 0.2rem 1rem; /* padding: 0.6rem 1rem 0.2rem 1rem; */
-    border-top: 1px solid var(--border);
+    padding: 0.75rem 1rem 0.2rem 1rem;
+    /* border-top: 1px solid var(--border); */
     border-bottom: 1px solid var(--border);
     width: 100% !important;
     cursor: pointer;
@@ -11,26 +11,28 @@
     background-color: var(--crit-hover);
 }
 
-.crit .img-container {
+.crit .pfp-container {
     padding: 0.3rem 0.75rem 0 0;
 }
 
-.img-container img {
-    width: 40px;
+.crit .pfp-container .pfp {
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
 }
 
 .crit .crit-container {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: 90%;
 }
 
 .crit-container .crit-info {
     display: flex;
     justify-content: center;
-    align-items: center;
+    /* align-items: center; */
     font-size: 0.95rem;
+    margin-bottom: 0.2rem;
 }
 
 .crit-container .crit-info .display_name {
@@ -48,6 +50,10 @@
     color: var(--grey);
 }
 
+.crit-container .crit-info .icon-container {
+    margin: 0;
+}
+
 .separator {
     margin: 0 0.3rem;
     color: var(--grey);
@@ -60,8 +66,30 @@
     white-space: pre-wrap;
 }
 
+.crit-content .crit-text {
+    font-size: 0.9375rem;
+    font-weight: 500;
+    /* display: block; */
+    word-wrap: break-word;
+}
+
+.crit-text p {
+    width: 100%;
+}
+
+.crit-content .media-container {
+    margin-top: 0.75rem;
+}
+
+.crit-content .media-container .crit_media {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+}
+
 .crit-actions {
     display: flex;
+    justify-content: space-between;
     margin-top: 0.4rem;
     margin-bottom: 0.2rem;
 }
@@ -75,7 +103,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-right: 2rem;
+    /* margin-right: 2rem; */
     transition: all 0.2s ease-out;
 }
 
@@ -103,6 +131,11 @@
     margin-right: 0.5rem;
     border-radius: 50%;
     transition: all 0.2s ease-out;
+}
+
+.crit-btn.more .icon-container {
+    width: auto;
+    height: auto;
 }
 
 .crit-btn.more {

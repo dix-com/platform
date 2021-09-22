@@ -1,9 +1,7 @@
-import userImage from "../../assets/elon.jpg";
 import "../../styles/Crit.css";
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 import { IconContext } from "react-icons";
 import { FaRegComment, FaComment } from "react-icons/fa";
@@ -13,25 +11,34 @@ import { IoMdStats } from "react-icons/io";
 import { TbShare2 } from "react-icons/tb";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 
+import { CritText } from "../index";
+import { useCheckAuthQuery } from "../../store/api/authApi";
+import { useLikeCritMutation } from "../../store/api/userApi";
+import { getTimeDifference } from "../../helpers/date";
+
 const Crit = ({ crit }) => {
-    const user = useSelector((state) => state.auth.user);
+    const {
+        data: {
+            isAuthenticated,
+            info: { id },
+        },
+    } = useCheckAuthQuery();
 
-    const [replied, setReplied] = useState(false);
-    const [recrited, setRecrited] = useState(false);
-    const [liked, setLiked] = useState(false);
+    const [likeCrit] = useLikeCritMutation();
 
-    useEffect(() => {
-        if (user) {
-            if (crit.likes.includes(user._id)) setLiked(true);
-            if (crit.replies.includes(user._id)) setReplied(true);
-            if (crit.recrits.includes(user._id)) setRecrited(true);
-        }
-    }, [crit, user]);
+    const [liked, setLiked] = useState(crit.likes.includes(id));
+    const [recrited, setRecrited] = useState(crit.recrits.includes(id));
+    const [replied, setReplied] = useState(crit.replies.includes(id));
 
     const handleLinkClick = (e) => {
-        if (!user) {
+        if (!isAuthenticated) {
             e.preventDefault();
         }
+    };
+
+    const handleLike = async (e, id) => {
+        e.preventDefault();
+        await likeCrit({ id }).unwrap();
     };
 
     const handleReply = (e) => {
@@ -39,10 +46,6 @@ const Crit = ({ crit }) => {
     };
 
     const handleRecrit = (e) => {
-        e.preventDefault();
-    };
-
-    const handleLike = (e) => {
         e.preventDefault();
     };
 
@@ -55,78 +58,127 @@ const Crit = ({ crit }) => {
     };
 
     return (
-        <Link to={`/${crit.author.username}/${crit._id}`} className="crit" onClick={handleLinkClick}>
-            <div className="img-container">
-                <Link to={`/${crit.author.username}`} onClick={handleLinkClick}>
-                    <img src={userImage} alt="User PFP" />
-                </Link>
-            </div>
-            <div className="crit-container">
-                <div className="crit-info">
-                    <Link to={`/${crit.author.username}`} className="display_name" onClick={handleLinkClick}>
-                        {crit.author.displayName}
+        <IconContext.Provider value={{ className: "crit_icon" }}>
+            <Link
+                className="crit"
+                to={`/${crit.author.username}/status/${crit._id}`}
+                onClick={handleLinkClick}
+            >
+                <div className="img-container">
+                    <Link
+                        to={`/${crit.author.username}`}
+                        className="pfp-container"
+                        onClick={handleLinkClick}
+                    >
+                        <img
+                            src={crit.author.profileImageURL}
+                            className="pfp"
+                            alt="User PFP"
+                        />
                     </Link>
+                </div>
 
-                    <p className="username">@{crit.author.username}</p>
-                    <span className="separator">·</span>
-                    <p className="date">{crit.createdAt}</p>
+                <div className="crit-container">
+                    <div className="crit-info">
+                        <Link
+                            to={`/${crit.author.username}`}
+                            className="display_name"
+                            onClick={handleLinkClick}
+                        >
+                            {crit.author.displayName}
+                        </Link>
 
-                    <button className="crit-btn more" disabled={!user} onClick={handleMore}>
-                        <div className="icon-container">
-                            <IconContext.Provider value={{ className: "crit_icon" }}>
+                        <p className="username">@{crit.author.username}</p>
+                        <span className="separator">·</span>
+                        <p className="date">{getTimeDifference(crit.createdAt)}</p>
+
+                        <button
+                            className="crit-btn more"
+                            disabled={!isAuthenticated}
+                            onClick={handleMore}
+                        >
+                            <div className="icon-container">
                                 <IoEllipsisHorizontal size="16" />
-                            </IconContext.Provider>
-                        </div>
-                    </button>
-                </div>
+                            </div>
+                        </button>
+                    </div>
 
-                <div className="crit-content">
-                    <p className="crit_text">{crit.content}</p>
-                </div>
+                    <div className="crit-content">
+                        <CritText
+                            text={crit.content}
+                            highlight=" "
+                        />
 
-                <div className="crit-actions">
-                    <button className={`crit-btn comment ${replied && "applied"}`} disabled={!user} onClick={handleReply}>
-                        <div className="icon-container">
-                            <IconContext.Provider value={{ className: "crit_icon" }}>
+                        {crit.media?.[0] && (
+                            <div className="media-container">
+                                <img
+                                    src={crit.media[0].url}
+                                    className="crit_media"
+                                    alt="Crit Media"
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="crit-actions">
+                        <button
+                            className={`crit-btn comment ${replied && "applied"}`}
+                            disabled={!isAuthenticated}
+                            onClick={handleReply}
+                        >
+                            <div className="icon-container">
                                 {replied ? <FaComment size="15.5" /> : <FaRegComment size="15.5" />}
-                            </IconContext.Provider>
-                        </div>
-                        <p>{crit.replies.length}</p>
-                    </button>
-                    <button className={`crit-btn recrit ${recrited && "applied"}`} disabled={!user} onClick={handleRecrit}>
-                        <div className="icon-container">
-                            <IconContext.Provider value={{ className: "crit_icon" }}>
+                            </div>
+                            <p>{crit.replies.length}</p>
+                        </button>
+
+                        <button
+                            className={`crit-btn recrit ${recrited && "applied"}`}
+                            disabled={!isAuthenticated}
+                            onClick={handleRecrit}
+                        >
+                            <div className="icon-container">
                                 <BiRepost size="21" />
-                            </IconContext.Provider>
-                        </div>
-                        <p>{crit.recrits.length}</p>
-                    </button>
-                    <button className={`crit-btn like ${liked && "applied"}`} disabled={!user} onClick={handleLike}>
-                        <div className="icon-container">
-                            <IconContext.Provider value={{ className: "crit_icon" }}>
-                                {liked ? <AiFillHeart size="18" /> : <AiOutlineHeart size="18" />}
-                            </IconContext.Provider>
-                        </div>
-                        <p>{crit.likes.length}</p>
-                    </button>
-                    <button className="crit-btn view" disabled={!user} onClick={handleShare}>
-                        <div className="icon-container">
-                            <IconContext.Provider value={{ className: "crit_icon" }}>
+                            </div>
+                            <p>{crit.recrits.length}</p>
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`crit-btn like ${liked && "applied"}`}
+                            disabled={!isAuthenticated}
+                            onClick={(e) => handleLike(e, crit._id)}
+                        >
+                            <div className="icon-container like-animation">
+                                {liked ? <AiFillHeart size="17" /> : <AiOutlineHeart size="17" />}
+                            </div>
+                            <p>{crit.likes.length}</p>
+                        </button>
+
+                        <button
+                            className="crit-btn view"
+                            disabled={!isAuthenticated}
+                            onClick={handleShare}
+                        >
+                            <div className="icon-container">
                                 <IoMdStats size="18" />
-                            </IconContext.Provider>
-                        </div>
-                        <p>{crit.views.length}</p>
-                    </button>
-                    <button className="crit-btn share" disabled={!user} onClick={handleShare}>
-                        <div className="icon-container">
-                            <IconContext.Provider value={{ className: "crit_icon" }}>
+                            </div>
+                            <p>0</p>
+                        </button>
+
+                        <button
+                            className="crit-btn share"
+                            disabled={!isAuthenticated}
+                            onClick={handleShare}
+                        >
+                            <div className="icon-container">
                                 <TbShare2 size="19" />
-                            </IconContext.Provider>
-                        </div>
-                    </button>
+                            </div>
+                        </button>
+                    </div>
                 </div>
-            </div>
-        </Link>
+            </Link>
+        </IconContext.Provider>
     );
 };
 

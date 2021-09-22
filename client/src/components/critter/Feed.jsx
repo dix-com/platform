@@ -1,26 +1,33 @@
 import "../../styles/Feed.css";
-import Crit from "./Crit";
 
-const dummyCrit = {
-    _id: "123456789",
-    content: "42+10",
-    createdAt: "Jun 28",
-    author: {
-        displayName: "Elon Musk",
-        username: "elonmusk",
-    },
-    replies: [""],
-    recrits: [""],
-    likes: ["64aadf20e66c076cab2c939d"],
-    views: [""],
-};
+import { Crit, Spinner } from "../index";
 
-const Feed = ({ crits }) => {
+const Feed = ({ crits = [], isCritsLoading, EmptyFeedComponent }) => {
     return (
         <section id="feed">
-            {[...Array(10)].map((_, idx) => (
-                <Crit key={idx} crit={dummyCrit} />
-            ))}
+            {isCritsLoading ? (
+                <div
+                    className="spinner-wrapper"
+                    style={{
+                        width: "100%",
+                        height: "200px",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
+                >
+                    <Spinner />
+                </div>
+            ) : crits.length > 0 ? (
+                crits.map((crit, idx) => (
+                    <Crit
+                        key={idx}
+                        crit={crit}
+                    />
+                ))
+            ) : (
+                EmptyFeedComponent
+            )}
         </section>
     );
 };
