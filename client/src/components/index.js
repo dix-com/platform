@@ -16,3 +16,4 @@ export { default as CritText } from "./critter/CritText";
 export { default as CritModal } from "./modals/CritModal";
 export { default as FloatOptions } from "./modals/FloatOptions";
 export { default as Crit } from "./critter/Crit";
+export { default as EditProfile } from "./modals/EditProfile";
