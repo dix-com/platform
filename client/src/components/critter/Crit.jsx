@@ -13,10 +13,10 @@ import { IoEllipsisHorizontal } from "react-icons/io5";
 
 import { CritText } from "../index";
 import { useCheckAuthQuery } from "../../store/api/authApi";
-import { useLikeCritMutation } from "../../store/api/userApi";
+import { useLikeCritMutation, useUnlikeCritMutation } from "../../store/api/userApi";
 import { getTimeDifference } from "../../helpers/date";
 
-const Crit = ({ crit }) => {
+const Crit = ({ crit, lastElementRef }) => {
     const {
         data: {
             isAuthenticated,
@@ -25,10 +25,7 @@ const Crit = ({ crit }) => {
     } = useCheckAuthQuery();
 
     const [likeCrit] = useLikeCritMutation();
-
-    const [liked, setLiked] = useState(crit.likes.includes(id));
-    const [recrited, setRecrited] = useState(crit.recrits.includes(id));
-    const [replied, setReplied] = useState(crit.replies.includes(id));
+    const [unlikeCrit] = useUnlikeCritMutation();
 
     const handleLinkClick = (e) => {
         if (!isAuthenticated) {
@@ -36,9 +33,12 @@ const Crit = ({ crit }) => {
         }
     };
 
-    const handleLike = async (e, id) => {
+    const handleLike = async (e) => {
         e.preventDefault();
-        await likeCrit({ id }).unwrap();
+
+        const isLiked = crit.likes.includes(id);
+
+        isLiked ? await unlikeCrit({ id: crit._id }) : await likeCrit({ id: crit._id });
     };
 
     const handleReply = (e) => {
@@ -63,6 +63,7 @@ const Crit = ({ crit }) => {
                 className="crit"
                 to={`/${crit.author.username}/status/${crit._id}`}
                 onClick={handleLinkClick}
+                ref={lastElementRef}
             >
                 <div className="img-container">
                     <Link
@@ -94,8 +95,8 @@ const Crit = ({ crit }) => {
 
                         <button
                             className="crit-btn more"
-                            disabled={!isAuthenticated}
                             onClick={handleMore}
+                            disabled={!isAuthenticated}
                         >
                             <div className="icon-container">
                                 <IoEllipsisHorizontal size="16" />
@@ -122,18 +123,26 @@ const Crit = ({ crit }) => {
 
                     <div className="crit-actions">
                         <button
-                            className={`crit-btn comment ${replied && "applied"}`}
-                            disabled={!isAuthenticated}
+                            className={`crit-btn comment ${
+                                crit.replies.includes(id) && "applied"
+                            }`}
                             onClick={handleReply}
+                            disabled={!isAuthenticated}
                         >
                             <div className="icon-container">
-                                {replied ? <FaComment size="15.5" /> : <FaRegComment size="15.5" />}
+                                {crit.replies.includes(id) ? (
+                                    <FaComment size="15.5" />
+                                ) : (
+                                    <FaRegComment size="15.5" />
+                                )}
                             </div>
                             <p>{crit.replies.length}</p>
                         </button>
 
                         <button
-                            className={`crit-btn recrit ${recrited && "applied"}`}
+                            className={`crit-btn recrit ${
+                                crit.recrits.includes(id) && "applied"
+                            }`}
                             disabled={!isAuthenticated}
                             onClick={handleRecrit}
                         >
@@ -145,20 +154,24 @@ const Crit = ({ crit }) => {
 
                         <button
                             type="button"
-                            className={`crit-btn like ${liked && "applied"}`}
-                            disabled={!isAuthenticated}
+                            className={`crit-btn like ${crit.likes.includes(id) && "applied"}`}
                             onClick={(e) => handleLike(e, crit._id)}
+                            disabled={!isAuthenticated}
                         >
                             <div className="icon-container like-animation">
-                                {liked ? <AiFillHeart size="17" /> : <AiOutlineHeart size="17" />}
+                                {crit.likes.includes(id) ? (
+                                    <AiFillHeart size="17" />
+                                ) : (
+                                    <AiOutlineHeart size="17" />
+                                )}
                             </div>
                             <p>{crit.likes.length}</p>
                         </button>
 
                         <button
                             className="crit-btn view"
-                            disabled={!isAuthenticated}
                             onClick={handleShare}
+                            disabled={!isAuthenticated}
                         >
                             <div className="icon-container">
                                 <IoMdStats size="18" />
@@ -168,8 +181,8 @@ const Crit = ({ crit }) => {
 
                         <button
                             className="crit-btn share"
-                            disabled={!isAuthenticated}
                             onClick={handleShare}
+                            disabled={!isAuthenticated}
                         >
                             <div className="icon-container">
                                 <TbShare2 size="19" />

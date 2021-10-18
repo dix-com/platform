@@ -26,9 +26,9 @@ export const userApi = baseApi.injectEndpoints({
             providesTags: (result, err, id) => [{ type: "Post", id }],
         }),
         getUserCrits: builder.query({
-            query: (identifier) => {
+            query: ({ identifier, page, limit }) => {
                 return {
-                    url: `/users/${identifier}/crits`,
+                    url: `/users/${identifier}/crits?page=${page}&limit=${limit}`,
                 };
             },
             transformResponse: (response) => response.crits,
@@ -49,6 +49,7 @@ export const userApi = baseApi.injectEndpoints({
             }),
             transformResponse: (response) => response.data.likedCrits,
         }),
+
         createCrit: builder.mutation({
             query: (data) => {
                 return {
@@ -109,16 +110,28 @@ export const userApi = baseApi.injectEndpoints({
             },
             invalidatesTags: (result, error, { id }) => [{ type: "Post", id }],
         }),
+        unlikeCrit: builder.mutation({
+            query: ({ id }) => {
+                return {
+                    url: `/crits/${id}/like`,
+                    method: "DELETE",
+                };
+            },
+            invalidatesTags: (result, error, { id }) => [{ type: "Post", id }],
+        }),
     }),
 });
 
 export const {
     useGetUserInfoQuery,
     useGetUserCritsQuery,
+    useGetUserFollowersQuery,
+    useGetUserFollowingQuery,
     useUpdateUserMutation,
     useFollowUserMutation,
     useUnfollowUserMutation,
     useLikeCritMutation,
+    useUnlikeCritMutation,
     useCreateCritMutation,
     useGetUserLikesQuery,
 } = userApi;

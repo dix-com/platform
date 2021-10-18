@@ -7,7 +7,7 @@ const critSchema = new Schema(
     {
         content: {
             type: String,
-            required: true,
+            required: false,
             maxLength: [280, "The crit can't be longer than 280 characters."],
             validate: {
                 validator: (c) => {

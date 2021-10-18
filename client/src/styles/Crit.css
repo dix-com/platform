@@ -146,6 +146,7 @@
 
 .crit-btn .crit_icon {
     color: var(--grey);
+    transition: all 0.2s ease-out;
 }
 
 .crit-btn.recrit:hover .icon-container {

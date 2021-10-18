@@ -2,7 +2,7 @@ import "../../styles/Feed.css";
 
 import { Crit, Spinner } from "../index";
 
-const Feed = ({ crits = [], isCritsLoading, EmptyFeedComponent }) => {
+const Feed = ({ crits = [], isCritsLoading, lastElementRef, EmptyFeedComponent }) => {
     return (
         <section id="feed">
             {isCritsLoading ? (
@@ -23,6 +23,7 @@ const Feed = ({ crits = [], isCritsLoading, EmptyFeedComponent }) => {
                     <Crit
                         key={idx}
                         crit={crit}
+                        lastElementRef={lastElementRef}
                     />
                 ))
             ) : (
