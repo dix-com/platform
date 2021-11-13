@@ -1,0 +1,142 @@
+.crit-form {
+    display: flex;
+    padding: 0.5rem 1rem 0 1rem;
+    width: 100% !important;
+}
+
+.crit-form.force-expand {
+    min-height: 100%;
+    flex-grow: 1;
+}
+
+.crit-form .pfp-container {
+    padding-top: 0.5rem;
+    margin-right: 0.75rem !important;
+}
+
+.crit-form .pfp-container .pfp {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.crit-input {
+    width: 100%;
+}
+
+.crit-input_container {
+    height: auto;
+}
+
+.crit-input_container.expanded {
+    border-bottom: 1px solid var(--border);
+    /* height: 100%; */
+}
+
+.crit-input_container textarea::placeholder {
+    color: var(--input-placeholder);
+    letter-spacing: 0.3px;
+}
+
+.crit-form .crit-input_container .crit-text {
+    display: none;
+}
+
+.crit-input_container.expanded .crit-text {
+    display: block;
+}
+
+.media-preview {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+}
+
+.media-preview .dark-round-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+}
+
+.media-preview img {
+    border-radius: 1rem;
+    width: 100%;
+}
+
+.crit-input_container.expanded .audience,
+.crit-input_container.expanded .reply {
+    display: flex;
+}
+
+.crit-form.force-expand .reply,
+.crit-form.force-expand .audience {
+    width: auto;
+}
+
+.crit-form.force-expand .reply {
+    margin-top: auto;
+}
+
+.audience,
+.reply {
+    width: auto;
+}
+
+.reply {
+    display: none;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.2rem 0.65rem;
+    margin-bottom: 0.6rem;
+    border-radius: 99rem;
+    color: var(--primary-colour);
+}
+
+.reply:hover {
+    background-color: var(--borderless-hover);
+}
+
+.reply-option {
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+}
+
+.audience {
+    display: none;
+    font-size: 0.9rem;
+    color: var(--primary-colour);
+    width: auto;
+    border: 1px solid var(--primary-colour);
+    border-radius: 99rem;
+    padding: 0.15rem 0.8rem;
+    margin: 0.5rem 0;
+}
+
+.audience:hover {
+    background-color: var(--borderless-hover);
+}
+
+.crit-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.crit-submit .separator {
+    height: 25px;
+    width: 2px;
+    background-color: rgb(62, 65, 68);
+    border-radius: 99999rem;
+    margin: 0 0.7rem;
+}
+
+.post-btn {
+    border-radius: 99999rem;
+    background-color: var(--primary-colour);
+    padding: 0.4rem 1rem;
+    transition: all 0.2s linear;
+}
+
+.crit-form .crit-actions {
+    padding: 0.5rem 0 !important;
+}
