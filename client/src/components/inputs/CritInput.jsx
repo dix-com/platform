@@ -3,6 +3,7 @@ import "../../styles/CritInput.css";
 import { useEffect, useRef } from "react";
 import { IconContext } from "react-icons";
 import { IoMdClose } from "react-icons/io";
+
 import { CritText } from "../index";
 
 const CritInput = ({
