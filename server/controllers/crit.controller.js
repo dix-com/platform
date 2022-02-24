@@ -1,7 +1,8 @@
+const User = require("../models/User.model");
 const Crit = require("../models/Crit.model");
-
 const asyncHandler = require("../middlewares/asyncHandler");
-const { NotFoundError } = require("../config/ApplicationError");
+
+const { NotFoundError, ForbiddenError } = require("../utils/errors");
 
 const getCrit = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
@@ -19,18 +20,8 @@ const getCrit = asyncHandler(async (req, res, next) => {
     });
 });
 
-const getLikingUsers = asyncHandler(async (req, res, next) => {
-    const { critId } = req.params;
-
-    const crit = await Crit.findById(critId).select("likes -_id").populate("likes");
-
-    console.log(crit);
-
-    // TODO: Get specific data to display on liking users page
-});
-
 const createCrit = asyncHandler(async (req, res, next) => {
-    const { content, author } = req.body;
+    const { content, author, replyTo = null, quoteTo = null } = req.body;
 
     const mentions = content.match(/(@[a-zA-Z0-9_]+)/g);
     const hashtags = content.match(/#\w+/g);
@@ -40,49 +31,34 @@ const createCrit = asyncHandler(async (req, res, next) => {
         author,
         mentions,
         hashtags,
+        replyTo,
+        quoteTo,
     });
 
-    req.file &&
-        (crit.media = {
+    if (replyTo) {
+        const originalCrit = await Crit.findById(replyTo);
+
+        if (!originalCrit) {
+            return next(new NotFoundError("Crit being replied to is not found!"));
+        }
+
+        await originalCrit.updateRepliesCount();
+    }
+
+    if (quoteTo) {
+        const originalCrit = await Crit.findById(quoteTo);
+
+        if (!originalCrit) {
+            return next(new NotFoundError("Crit being recrited is not found!"));
+        }
+    }
+
+    // attach media if available
+    if (req.file)
+        crit.media = {
             url: `http://localhost:8080/${req.file.path}`,
             mediaType: req.file.mimetype.split("/")[0],
-        });
-
-    const newCrit = await crit.save();
-
-    return res.status(200).json({
-        crit: newCrit,
-    });
-});
-
-const createReply = asyncHandler(async (req, res, next) => {
-    const { content, author, media, hashtags, inReplyTo } = req.body;
-
-    const crit = new Crit({
-        content,
-        author,
-        media,
-        hashtags,
-        inReplyTo,
-    });
-
-    const newCrit = await crit.save();
-
-    return res.status(200).json({
-        crit: newCrit,
-    });
-});
-
-const createRecrit = asyncHandler(async () => {
-    const { content, author, media, hashtags, recritId } = req.body;
-
-    const crit = new Crit({
-        content,
-        author,
-        media,
-        hashtags,
-        recritId,
-    });
+        };
 
     const newCrit = await crit.save();
 
@@ -95,12 +71,10 @@ const likeCrit = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
     const critId = req.params.critId;
 
+    // addToSet will only add if it doesn't exist yet
     const crit = await Crit.findByIdAndUpdate(
         critId,
-        {
-            // addToSet will only add if it doesn't exist yet
-            $addToSet: { likes: userId },
-        },
+        { $addToSet: { likes: userId } },
         { new: true }
     );
 
@@ -108,11 +82,8 @@ const likeCrit = asyncHandler(async (req, res, next) => {
         return next(new NotFoundError("Crit not found!"));
     }
 
-    console.log("got here");
     return res.status(200).json({
-        data: {
-            isLiked: true,
-        },
+        isLiked: true,
     });
 });
 
@@ -122,9 +93,7 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
 
     const crit = await Crit.findByIdAndUpdate(
         critId,
-        {
-            $pull: { likes: userId },
-        },
+        { $pull: { likes: userId } },
         { new: true }
     );
 
@@ -132,26 +101,14 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
         return next(new NotFoundError("Crit not found!"));
     }
 
-    return {
-        data: {
-            isLiked: false,
-            likes: crit.likes,
-        },
-    };
-});
-
-const deleteCrit = asyncHandler(async (req, res, next) => {
-    const crit = res.crit;
-    // todo: delete this crit using await res.crit.remove();?
+    return res.status(200).json({
+        isLiked: false,
+    });
 });
 
 module.exports = {
     getCrit,
-    getLikingUsers,
     createCrit,
-    createReply,
-    createRecrit,
     likeCrit,
     unlikeCrit,
-    deleteCrit,
 };
