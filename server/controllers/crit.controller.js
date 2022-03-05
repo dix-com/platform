@@ -106,9 +106,30 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
     });
 });
 
+const deleteCrit = asyncHandler(async (req, res, next) => {
+    const { critId } = req.params;
+
+    const crit = await Crit.findById(critId);
+
+    if (!crit) {
+        return next(new NotFoundError("Crit not found!"));
+    }
+
+    if (crit.author._id.toString() !== req.user._id.toString()) {
+        return next(new ForbiddenError("You are not authorized to delete this crit!"));
+    }
+
+    await crit.remove();
+
+    return res.status(200).json({
+        message: "Crit deleted successfully!",
+    });
+});
+
 module.exports = {
     getCrit,
     createCrit,
     likeCrit,
     unlikeCrit,
+    deleteCrit,
 };
