@@ -7,10 +7,11 @@ const critSchema = new Schema(
     {
         content: {
             type: String,
-            required: false,
+            required: true,
+            trim: true,
             maxLength: [280, "The crit can't be longer than 280 characters."],
             validate: {
-                validator: (c) => {
+                validator: function (c) {
                     return c.trim().length > 0;
                 },
                 message: "The crit can't be empty.",
@@ -37,8 +38,7 @@ const critSchema = new Schema(
         ],
         mentions: [
             {
-                type: ObjectId,
-                ref: "User",
+                type: String,
                 set: (m) => m.toLowerCase().replaceAll("@", ""),
             },
         ],
@@ -53,37 +53,65 @@ const critSchema = new Schema(
             enum: ["EVERYONE", "FOLLOWED", "MENTIONED"],
             default: "EVERYONE",
         },
-        recritId: {
+        replyTo: {
             type: ObjectId,
             ref: "Crit",
+            default: null,
         },
-        inReplyTo: {
+        quoteTo: {
             type: ObjectId,
             ref: "Crit",
+            default: null,
         },
-        likes: [
-            {
-                type: ObjectId,
-                ref: "User",
-            },
-        ],
-        recrits: [
-            {
-                type: ObjectId,
-                ref: "User",
-            },
-        ],
-        replies: [
-            {
-                type: ObjectId,
-                ref: "Crit",
-            },
-        ],
+        repliesCount: {
+            type: Number,
+            default: 0,
+        },
+        likes: {
+            type: [ObjectId],
+            ref: "User",
+            default: [],
+        },
+        recrits: {
+            type: [ObjectId],
+            ref: "User",
+            default: [],
+        },
     },
     { timestamps: true }
 );
 
 // critSchema.index({author: 1, hashtags: 1});
+
+critSchema.methods.updateRepliesCount = async function () {
+    this.repliesCount = await mongoose.model("Crit").countDocuments({
+        replyTo: this._id,
+    });
+
+    return this.save();
+};
+
+critSchema.methods.addRecrit = function (userId) {
+    const isRecrited = this.recrits.some((id) => id === userId);
+
+    if (!isRecrited) {
+        this.recrits.push(userId);
+        return this.save();
+    }
+
+    return Promise.resolve(this);
+};
+
+critSchema.methods.deleteRecrit = function (userId) {
+    const isRecrited = this.recrits.some((id) => id.equals(userId));
+
+    if (isRecrited) {
+        this.recrits.remove(userId);
+        return this.save();
+    }
+
+    return Promise.resolve(this);
+};
 
 const Crit = mongoose.model("Crit", critSchema);
 

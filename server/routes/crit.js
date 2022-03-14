@@ -14,9 +14,13 @@ router.get("/:critId", critController.getCrit);
 
 router.post("/", upload.single("media"), critController.createCrit);
 
+router.post("/:critId/repost", critController.createRepost);
+
 router.post("/:critId/like", critController.likeCrit);
 
 router.delete("/:id", critController.deleteCrit);
+
+router.delete("/:critId/repost", critController.deleteRepost);
 
 router.delete("/:critId/like", critController.unlikeCrit);
 
