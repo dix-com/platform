@@ -18,7 +18,7 @@ router.post("/:critId/repost", critController.createRepost);
 
 router.post("/:critId/like", critController.likeCrit);
 
-router.delete("/:id", critController.deleteCrit);
+router.delete("/:critId", critController.deleteCrit);
 
 router.delete("/:critId/repost", critController.deleteRepost);
 

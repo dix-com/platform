@@ -10,13 +10,11 @@ const getCrit = asyncHandler(async (req, res, next) => {
     const crit = await Crit.findById(critId).populate("author");
 
     if (!crit) {
-        return next(new NotFoundError("Crit not found!"));
+        return next(new NotFoundError("The requested crit couldn't be found!"));
     }
 
     return res.status(200).json({
-        data: {
-            crit: crit || [],
-        },
+        crit: crit || [],
     });
 });
 
@@ -35,6 +33,10 @@ const createCrit = asyncHandler(async (req, res, next) => {
         quoteTo,
     });
 
+    // check for a particular type of crit
+    if (quoteTo && !(await Crit.exists({ _id: quoteTo })))
+        return next(new NotFoundError("Crit being quoted is not found!"));
+
     if (replyTo) {
         const originalCrit = await Crit.findById(replyTo);
 
@@ -45,20 +47,13 @@ const createCrit = asyncHandler(async (req, res, next) => {
         await originalCrit.updateRepliesCount();
     }
 
-    if (quoteTo) {
-        const originalCrit = await Crit.findById(quoteTo);
-
-        if (!originalCrit) {
-            return next(new NotFoundError("Crit being recrited is not found!"));
-        }
-    }
-
-    // attach media if available
-    if (req.file)
+    // attach any incoming files
+    if (req.file) {
         crit.media = {
             url: `http://localhost:8080/${req.file.path}`,
             mediaType: req.file.mimetype.split("/")[0],
         };
+    }
 
     const newCrit = await crit.save();
 
@@ -80,7 +75,7 @@ const deleteCrit = asyncHandler(async (req, res, next) => {
         return next(new ForbiddenError("You are not authorized to delete this crit!"));
     }
 
-    await crit.remove();
+    await crit.deleteOne();
 
     return res.status(200).json({
         message: "Crit deleted successfully!",
@@ -89,7 +84,6 @@ const deleteCrit = asyncHandler(async (req, res, next) => {
 
 const createRepost = asyncHandler(async (req, res, next) => {
     const { _id: userId } = req.user;
-
     const { critId } = req.params;
 
     const crit = await Crit.findById(critId);
@@ -130,15 +124,11 @@ const likeCrit = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
     const critId = req.params.critId;
 
-    // addToSet will only add if it doesn't exist yet
-    const crit = await Crit.findByIdAndUpdate(
-        critId,
-        { $addToSet: { likes: userId } },
-        { new: true }
-    );
+    // addToSet: update the array only if the value doesn't exist yet
+    const crit = await Crit.findByIdAndUpdate(critId, { $addToSet: { likes: userId } });
 
     if (!crit) {
-        return next(new NotFoundError("Crit not found!"));
+        return next(new NotFoundError("The crit to be liked was not found!"));
     }
 
     return res.status(200).json({
@@ -150,14 +140,10 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
     const critId = req.params.critId;
 
-    const crit = await Crit.findByIdAndUpdate(
-        critId,
-        { $pull: { likes: userId } },
-        { new: true }
-    );
+    const crit = await Crit.findByIdAndUpdate(critId, { $pull: { likes: userId } });
 
     if (!crit) {
-        return next(new NotFoundError("Crit not found!"));
+        return next(new NotFoundError("The crit to be unliked was not found!"));
     }
 
     return res.status(200).json({
