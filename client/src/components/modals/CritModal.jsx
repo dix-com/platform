@@ -6,16 +6,10 @@ import { useState, useRef } from "react";
 import { IconContext } from "react-icons";
 import { IoEarth } from "react-icons/io5";
 
-import {
-    ColumnHeader,
-    CritForm,
-    BaseModal,
-    CritActions,
-    CritInput,
-    QuotePreview,
-} from "../index";
+import { ColumnHeader, BaseModal, CritActions, CritInput, QuotePreview } from "../index";
 import { useCheckAuthQuery } from "../../store/api/authApi";
-import { useGetUserInfoQuery, useCreateCritMutation } from "../../store/api/userApi";
+import { useGetUserInfoQuery } from "../../store/api/userApi";
+import { useCreateCritMutation } from "../../store/api/critApi";
 
 const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
     const [crit, setCrit] = useState("");

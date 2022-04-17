@@ -10,7 +10,8 @@ import useOutsideClick from "../../hooks/useOutsideClick";
 
 import { CritInput, CritActions } from "../index";
 import { useCheckAuthQuery } from "../../store/api/authApi";
-import { useGetUserInfoQuery, useCreateCritMutation } from "../../store/api/userApi";
+import { useGetUserInfoQuery } from "../../store/api/userApi";
+import { useCreateCritMutation } from "../../store/api/critApi";
 
 const CritForm = ({ forceExpand, maxLength = 280 }) => {
     const [crit, setCrit] = useState("");
