@@ -21,3 +21,5 @@ export { default as CritInput } from "./inputs/CritInput";
 export { default as CritActions } from "./critter/CritActions";
 export { default as CritDetails } from "./shared/CritDetails";
 export { default as QuotePreview } from "./critter/QuotePreview";
+export { default as ConditionalLink } from "./inputs/ConditionalLink";
+export { default as LinkButton } from "./inputs/LinkButton";
