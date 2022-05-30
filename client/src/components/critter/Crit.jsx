@@ -1,119 +1,302 @@
 import "../../styles/Crit.css";
 
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { IconContext } from "react-icons";
-import { FaRegComment, FaComment } from "react-icons/fa";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
-import { BiRepost } from "react-icons/bi";
+import { PiPencilSimpleLine } from "react-icons/pi";
+import { LuRepeat2 } from "react-icons/lu";
+import { TbMessageCircle2, TbShare2, TbTrash, TbPinned } from "react-icons/tb";
 import { IoMdStats } from "react-icons/io";
-import { TbShare2 } from "react-icons/tb";
 import { IoEllipsisHorizontal } from "react-icons/io5";
+import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
+import { MdBlock } from "react-icons/md";
 
-import { CritText } from "../index";
+import {
+    CritText,
+    FloatOptions,
+    CritModal,
+    ReplyModal,
+    CritDetails,
+    QuotePreview,
+    LinkButton,
+    ConditionalLink,
+} from "../index";
+
 import { useCheckAuthQuery } from "../../store/api/authApi";
-import { useLikeCritMutation, useUnlikeCritMutation } from "../../store/api/userApi";
-import { getTimeDifference } from "../../helpers/date";
+import { useDeleteCritMutation } from "../../store/api/critApi";
+import {
+    useLikeCritMutation,
+    useUnlikeCritMutation,
+    useCreateRepostMutation,
+    useDeleteRepostMutation,
+    useFollowUserMutation,
+    useUnfollowUserMutation,
+} from "../../store/api/userApi";
 
-const Crit = ({ crit, lastElementRef }) => {
+import { isObjEmpty } from "../../utils/object";
+
+const Crit = ({ crit }) => {
+    const [replyModal, setReplyModal] = useState(false);
+    const [quoteModal, setQuoteModal] = useState(false);
+    const [recritFloat, setRecritFloat] = useState(false);
+    const [moreFloat, setMoreFloat] = useState(false);
+
+    const navigate = useNavigate();
+    const { pathname } = useLocation();
+
     const {
-        data: {
-            isAuthenticated,
-            info: { id },
-        },
+        data: { isAuthenticated, data: currentUser },
     } = useCheckAuthQuery();
 
+    const [deleteCrit] = useDeleteCritMutation();
+    const [createRepost] = useCreateRepostMutation();
+    const [deleteRepost] = useDeleteRepostMutation();
     const [likeCrit] = useLikeCritMutation();
     const [unlikeCrit] = useUnlikeCritMutation();
 
-    const handleLinkClick = (e) => {
-        if (!isAuthenticated) {
-            e.preventDefault();
+    const [followUser, followResult] = useFollowUserMutation();
+    const [unfollowUser, unfollowResult] = useUnfollowUserMutation();
+
+    const isReposted = crit.recrits.includes(currentUser.id);
+    const isLiked = crit.likes.includes(currentUser.id);
+    const isFollowingAuthor = crit.author.followers.includes(currentUser.id);
+
+    const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
+    const isQuote = crit.quoteTo && !isObjEmpty(crit.quoteTo);
+
+    const media = crit.media?.[0];
+
+    const handlePostClick = (e) => {
+        return isAuthenticated && navigate(`/${crit.author.username}/status/${crit._id}`);
+    };
+
+    const handleCritDelete = async () => {
+        const result = await deleteCrit(crit._id).unwrap();
+
+        if (!result?.error) {
+            closeMoreFloat();
         }
     };
 
+    const handleRecrit = async (e) => {
+        const recritResult = isReposted
+            ? await deleteRepost({ critId: crit._id })
+            : await createRepost({ critId: crit._id });
+
+        if (recritResult?.error) return;
+
+        if (
+            (isReposted && !recritResult.data?.isReposted) ||
+            (!isReposted && recritResult.data?.isReposted)
+        )
+            closeRecritFloat();
+    };
+
     const handleLike = async (e) => {
-        e.preventDefault();
-
-        const isLiked = crit.likes.includes(id);
-
         isLiked ? await unlikeCrit({ id: crit._id }) : await likeCrit({ id: crit._id });
     };
 
-    const handleReply = (e) => {
-        e.preventDefault();
+    const handleFollow = async () => {
+        const followData = {
+            id: currentUser.id,
+            targetUserId: crit.author._id,
+        };
+
+        isFollowingAuthor ? await unfollowUser(followData) : await followUser(followData);
     };
 
-    const handleRecrit = (e) => {
-        e.preventDefault();
-    };
+    const openReplyModal = () => setReplyModal(true);
+    const closeReplyModal = () => setReplyModal(false);
 
-    const handleShare = (e) => {
-        e.preventDefault();
+    const openQuoteModal = () => {
+        setQuoteModal(true);
+        setRecritFloat(false);
     };
+    const closeQuoteModal = () => setQuoteModal(false);
 
-    const handleMore = (e) => {
-        e.preventDefault();
-    };
+    const openRecritFloat = () => setRecritFloat(true);
+    const closeRecritFloat = () => setRecritFloat(false);
+
+    const openMoreFloat = () => setMoreFloat(true);
+    const closeMoreFloat = () => setMoreFloat(false);
 
     return (
         <IconContext.Provider value={{ className: "crit_icon" }}>
-            <Link
+            {replyModal && (
+                <ReplyModal
+                    isOpen={replyModal}
+                    onClose={closeReplyModal}
+                    replyingTo={crit}
+                />
+            )}
+
+            {quoteModal && (
+                <CritModal
+                    isOpen={quoteModal}
+                    onClose={closeQuoteModal}
+                    quote={crit}
+                />
+            )}
+
+            <ConditionalLink
                 className="crit"
                 to={`/${crit.author.username}/status/${crit._id}`}
-                onClick={handleLinkClick}
-                ref={lastElementRef}
+                state={{ previousPath: pathname }}
+                condition={isAuthenticated}
             >
+                {moreFloat && (
+                    <IconContext.Provider value={{ className: "float-icon" }}>
+                        {crit.author._id === currentUser.id && (
+                            <FloatOptions
+                                isOpen={moreFloat}
+                                onClose={closeMoreFloat}
+                                className="more-options"
+                            >
+                                <LinkButton
+                                    type="button"
+                                    className="more-btn delete"
+                                    onClick={handleCritDelete}
+                                >
+                                    <div className="float-icon-container">
+                                        <TbTrash />
+                                    </div>
+                                    Delete
+                                </LinkButton>
+
+                                <LinkButton
+                                    type="button"
+                                    className="more-btn"
+                                    disabled
+                                >
+                                    <div className="float-icon-container">
+                                        <TbPinned />
+                                    </div>
+                                    Pin to your profile
+                                </LinkButton>
+
+                                <LinkButton
+                                    type="button"
+                                    className="more-btn"
+                                    disabled
+                                >
+                                    <div className="float-icon-container">
+                                        <TbMessageCircle2 />
+                                    </div>
+                                    Change who can reply
+                                </LinkButton>
+                                <LinkButton
+                                    className="more-btn"
+                                    to={`/${crit.author.username}/status/${crit._id}/quotes`}
+                                    state={{ previousPath: pathname }}
+                                >
+                                    <div className="float-icon-container">
+                                        <IoMdStats />
+                                    </div>
+                                    View post engagements
+                                </LinkButton>
+                            </FloatOptions>
+                        )}
+
+                        {crit.author._id !== currentUser.id && (
+                            <FloatOptions
+                                isOpen={moreFloat}
+                                onClose={closeMoreFloat}
+                                className="more-options"
+                            >
+                                <LinkButton
+                                    type="button"
+                                    className="more-btn"
+                                    onClick={handleFollow}
+                                >
+                                    <div className="float-icon-container">
+                                        {isFollowingAuthor ? (
+                                            <RiUserUnfollowLine style={{ strokeWidth: 0 }} />
+                                        ) : (
+                                            <RiUserFollowLine style={{ strokeWidth: 0 }} />
+                                        )}
+                                    </div>
+                                    {isFollowingAuthor ? "Unfollow" : "Follow"} @
+                                    {crit.author.username}
+                                </LinkButton>
+
+                                <LinkButton
+                                    type="button"
+                                    className="more-btn"
+                                    disabled
+                                >
+                                    <div className="float-icon-container">
+                                        <MdBlock style={{ strokeWidth: 0 }} />
+                                    </div>
+                                    Block @{crit.author.username}
+                                </LinkButton>
+
+                                <Link
+                                    to={`/${crit.author.username}/status/${crit._id}/quotes`}
+                                    state={{ previousPath: pathname }}
+                                    className="more-btn"
+                                >
+                                    <div className="float-icon-container">
+                                        <IoMdStats />
+                                    </div>
+                                    View post engagements
+                                </Link>
+                            </FloatOptions>
+                        )}
+                    </IconContext.Provider>
+                )}
+
                 <div className="img-container">
                     <Link
                         to={`/${crit.author.username}`}
+                        state={{ previousPath: pathname }}
+                        onClick={handlePostClick}
                         className="pfp-container"
-                        onClick={handleLinkClick}
                     >
                         <img
                             src={crit.author.profileImageURL}
                             className="pfp"
-                            alt="User PFP"
+                            alt="User Pfp"
                         />
                     </Link>
                 </div>
 
                 <div className="crit-container">
-                    <div className="crit-info">
-                        <Link
-                            to={`/${crit.author.username}`}
-                            className="display_name"
-                            onClick={handleLinkClick}
-                        >
-                            {crit.author.displayName}
-                        </Link>
+                    {/* {username} recrited */}
+                    {crit.author._id !== currentUser.id && <p>{}</p>}
 
-                        <p className="username">@{crit.author.username}</p>
-                        <span className="separator">·</span>
-                        <p className="date">{getTimeDifference(crit.createdAt)}</p>
-
-                        <button
+                    <CritDetails crit={crit}>
+                        <LinkButton
                             className="crit-btn more"
-                            onClick={handleMore}
-                            disabled={!isAuthenticated}
+                            onClick={openMoreFloat}
                         >
                             <div className="icon-container">
                                 <IoEllipsisHorizontal size="16" />
                             </div>
-                        </button>
-                    </div>
+                        </LinkButton>
+                    </CritDetails>
+
+                    {isReply && (
+                        <span className="replyingTo">
+                            Replying to{" "}
+                            <Link
+                                to={`/${crit.replyTo.author.username}`}
+                                state={{ previousPath: pathname }}
+                                className="link-blue"
+                            >
+                                @{crit.replyTo.author.username}
+                            </Link>
+                        </span>
+                    )}
 
                     <div className="crit-content">
-                        <CritText
-                            text={crit.content}
-                            highlight=" "
-                        />
+                        <CritText text={crit.content} />
 
-                        {crit.media?.[0] && (
+                        {media && (
                             <div className="media-container">
                                 <img
-                                    src={crit.media[0].url}
+                                    src={media.url}
                                     className="crit_media"
                                     alt="Crit Media"
                                 />
@@ -121,76 +304,107 @@ const Crit = ({ crit, lastElementRef }) => {
                         )}
                     </div>
 
+                    {isQuote && <QuotePreview crit={crit.quoteTo} />}
+
                     <div className="crit-actions">
-                        <button
-                            className={`crit-btn comment ${
-                                crit.replies.includes(id) && "applied"
-                            }`}
-                            onClick={handleReply}
-                            disabled={!isAuthenticated}
+                        <LinkButton
+                            className={`crit-btn comment`}
+                            onClick={openReplyModal}
                         >
                             <div className="icon-container">
-                                {crit.replies.includes(id) ? (
-                                    <FaComment size="15.5" />
-                                ) : (
-                                    <FaRegComment size="15.5" />
-                                )}
+                                <TbMessageCircle2 />
                             </div>
-                            <p>{crit.replies.length}</p>
-                        </button>
 
-                        <button
-                            className={`crit-btn recrit ${
-                                crit.recrits.includes(id) && "applied"
-                            }`}
-                            disabled={!isAuthenticated}
-                            onClick={handleRecrit}
+                            <div className="count-container">
+                                <span>{crit.repliesCount}</span>
+                            </div>
+                        </LinkButton>
+
+                        <LinkButton
+                            className={`crit-btn recrit ${isReposted && "applied"}`}
+                            onClick={openRecritFloat}
                         >
                             <div className="icon-container">
-                                <BiRepost size="21" />
+                                <LuRepeat2 />
                             </div>
-                            <p>{crit.recrits.length}</p>
-                        </button>
 
-                        <button
+                            <div className="count-container">
+                                <span>{crit.recrits.length}</span>
+                            </div>
+
+                            {recritFloat && (
+                                <IconContext.Provider value={{ className: "float-icon" }}>
+                                    <FloatOptions
+                                        isOpen={recritFloat}
+                                        onClose={closeRecritFloat}
+                                        className="recrit-options"
+                                    >
+                                        <LinkButton
+                                            type="button"
+                                            className="more-btn"
+                                            onClick={handleRecrit}
+                                        >
+                                            <div className="float-icon-container">
+                                                <LuRepeat2 />
+                                            </div>
+
+                                            {isReposted ? "Undo Repost" : "Repost"}
+                                        </LinkButton>
+
+                                        <LinkButton
+                                            type="button"
+                                            className="more-btn"
+                                            onClick={openQuoteModal}
+                                        >
+                                            <div className="float-icon-container">
+                                                <PiPencilSimpleLine size="21" />
+                                            </div>
+                                            Quote
+                                        </LinkButton>
+                                    </FloatOptions>
+                                </IconContext.Provider>
+                            )}
+                        </LinkButton>
+
+                        <LinkButton
                             type="button"
-                            className={`crit-btn like ${crit.likes.includes(id) && "applied"}`}
-                            onClick={(e) => handleLike(e, crit._id)}
-                            disabled={!isAuthenticated}
+                            className={`crit-btn like ${isLiked && "applied"}`}
+                            data-type="inner-button"
+                            onClick={handleLike}
                         >
-                            <div className="icon-container like-animation">
-                                {crit.likes.includes(id) ? (
-                                    <AiFillHeart size="17" />
-                                ) : (
-                                    <AiOutlineHeart size="17" />
-                                )}
+                            <div className="icon-container">
+                                {isLiked ? <AiFillHeart /> : <AiOutlineHeart />}
                             </div>
-                            <p>{crit.likes.length}</p>
-                        </button>
 
-                        <button
+                            <div className="count-container">
+                                <span>{crit.likes.length}</span>
+                            </div>
+                        </LinkButton>
+
+                        <LinkButton
                             className="crit-btn view"
-                            onClick={handleShare}
-                            disabled={!isAuthenticated}
+                            disabled
                         >
                             <div className="icon-container">
-                                <IoMdStats size="18" />
+                                <IoMdStats />
                             </div>
-                            <p>0</p>
-                        </button>
 
-                        <button
+                            <div className="count-container">
+                                <span>0</span>
+                            </div>
+                        </LinkButton>
+
+                        <LinkButton
                             className="crit-btn share"
-                            onClick={handleShare}
-                            disabled={!isAuthenticated}
+                            disabled
                         >
                             <div className="icon-container">
-                                <TbShare2 size="19" />
+                                <TbShare2 />
                             </div>
-                        </button>
+                        </LinkButton>
                     </div>
                 </div>
-            </Link>
+            </ConditionalLink>
         </IconContext.Provider>
     );
 };

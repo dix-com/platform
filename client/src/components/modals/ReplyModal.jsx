@@ -17,6 +17,8 @@ import { useCheckAuthQuery } from "../../store/api/authApi";
 import { useGetUserInfoQuery } from "../../store/api/userApi";
 import { useCreateCritMutation } from "../../store/api/critApi";
 
+import { isObjEmpty } from "../../utils/object";
+
 const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
     const [crit, setCrit] = useState("");
     const [media, setMedia] = useState(null);
@@ -36,6 +38,8 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
     });
 
     const [createCrit] = useCreateCritMutation();
+
+    const isQuote = replyingTo.quoteTo && !isObjEmpty(replyingTo.quoteTo);
 
     const handleReply = async () => {
         const formData = new FormData();
@@ -87,7 +91,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
                         <CritText text={replyingTo.content} />
                     </div>
 
-                    {replyingTo.quoteTo && <QuotePreview crit={replyingTo.quoteTo} />}
+                    {isQuote && <QuotePreview crit={replyingTo.quoteTo} />}
 
                     <p className="replyingTo">
                         Replying to{" "}

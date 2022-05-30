@@ -9,8 +9,6 @@ const QuotePreview = ({ crit }) => {
     const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
     const media = crit.media?.[0];
 
-    console.log(crit);
-
     return (
         <Link
             to={`/${crit.author.username}/status/${crit._id}`}

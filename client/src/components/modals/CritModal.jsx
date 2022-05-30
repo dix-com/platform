@@ -37,7 +37,7 @@ const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
         formData.append("content", crit);
         formData.append("author", id);
         formData.append("media", media);
-        formData.append("recritId", quote?._id || null);
+        !!quote?._id && formData.append("quoteTo", quote._id);
 
         const result = await createCrit(formData).unwrap();
 

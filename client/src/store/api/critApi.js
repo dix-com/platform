@@ -14,13 +14,14 @@ export const critApi = baseApi.injectEndpoints({
                 method: "POST",
                 body: data,
             }),
-            invalidatesTags: [{ type: "Post", id: "LIST" }],
+            invalidatesTags: [{ type: "Post" }],
         }),
         deleteCrit: builder.mutation({
             query: (critId) => ({
                 url: `/crits/${critId}`,
                 method: "DELETE",
             }),
+            invalidatesTags: (result, error, critId) => [{ type: "Post", id: critId }],
         }),
     }),
 });
