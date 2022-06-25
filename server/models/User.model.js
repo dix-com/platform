@@ -93,6 +93,11 @@ const userSchema = new Schema(
             ref: "Crit",
             default: [],
         },
+        bookmarks: {
+            type: [ObjectId],
+            ref: "Crit",
+            default: [],
+        },
     },
     { timestamps: true }
 );

@@ -12,6 +12,7 @@ import { IoMdStats } from "react-icons/io";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
 import { MdBlock } from "react-icons/md";
+import { BiBookmark, BiSolidBookmark } from "react-icons/bi";
 
 import {
     CritText,
@@ -27,12 +28,15 @@ import {
 import { useCheckAuthQuery } from "../../store/api/authApi";
 import { useDeleteCritMutation } from "../../store/api/critApi";
 import {
+    useGetUserInfoQuery,
     useLikeCritMutation,
     useUnlikeCritMutation,
     useCreateRepostMutation,
     useDeleteRepostMutation,
     useFollowUserMutation,
     useUnfollowUserMutation,
+    useCreateBookmarkMutation,
+    useDeleteBookmarkMutation,
 } from "../../store/api/userApi";
 
 import { isObjEmpty } from "../../utils/object";
@@ -50,6 +54,10 @@ const Crit = ({ crit }) => {
         data: { isAuthenticated, data: currentUser },
     } = useCheckAuthQuery();
 
+    const { data: currentUserInfo } = useGetUserInfoQuery(currentUser?.username, {
+        skip: !currentUser?.username,
+    });
+
     const [deleteCrit] = useDeleteCritMutation();
     const [createRepost] = useCreateRepostMutation();
     const [deleteRepost] = useDeleteRepostMutation();
@@ -58,7 +66,12 @@ const Crit = ({ crit }) => {
 
     const [followUser, followResult] = useFollowUserMutation();
     const [unfollowUser, unfollowResult] = useUnfollowUserMutation();
+    const [createBookmark, createBookmarkResult] = useCreateBookmarkMutation();
+    const [deleteBookmark, deleteBookmarkResult] = useDeleteBookmarkMutation();
 
+    // console.log(currentUserInfo);
+    // console.log(crit);
+    const isBookmarked = currentUserInfo.bookmarks.includes(crit._id);
     const isReposted = crit.recrits.includes(currentUser.id);
     const isLiked = crit.likes.includes(currentUser.id);
     const isFollowingAuthor = crit.author.followers.includes(currentUser.id);
@@ -96,6 +109,15 @@ const Crit = ({ crit }) => {
 
     const handleLike = async (e) => {
         isLiked ? await unlikeCrit({ id: crit._id }) : await likeCrit({ id: crit._id });
+    };
+
+    const handleBookmark = async () => {
+        const bookmarkData = {
+            critId: crit._id,
+            userId: currentUser.id,
+        };
+
+        isBookmarked ? await deleteBookmark(bookmarkData) : await createBookmark(bookmarkData);
     };
 
     const handleFollow = async () => {
@@ -394,14 +416,26 @@ const Crit = ({ crit }) => {
                             </div>
                         </LinkButton>
 
-                        <LinkButton
-                            className="crit-btn share"
-                            disabled
-                        >
-                            <div className="icon-container">
-                                <TbShare2 />
-                            </div>
-                        </LinkButton>
+                        <div className="crit-actions-container">
+                            <LinkButton
+                                type="button"
+                                className="crit-btn bookmark"
+                                onClick={handleBookmark}
+                            >
+                                <div className="icon-container">
+                                    {isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
+                                </div>
+                            </LinkButton>
+
+                            <LinkButton
+                                className="crit-btn share"
+                                disabled
+                            >
+                                <div className="icon-container">
+                                    <TbShare2 />
+                                </div>
+                            </LinkButton>
+                        </div>
                     </div>
                 </div>
             </ConditionalLink>

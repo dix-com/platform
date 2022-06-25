@@ -66,6 +66,21 @@
     margin-top: 0.75rem !important;
 }
 
+.crit-actions-container {
+    display: flex;
+    align-items: center;
+}
+
+.crit-actions-container .bookmark .icon-container {
+    margin-right: 1rem;
+    stroke-width: unset !important;
+}
+
+.crit-actions-container .bookmark .icon-container .crit_icon {
+    font-size: 0.5rem !important;
+    stroke-width: unset !important;
+}
+
 .crit-btn {
     position: relative;
     display: flex;
@@ -196,6 +211,7 @@
 
 .crit-btn.comment:hover,
 .crit-btn.share:hover,
+.crit-btn.bookmark:hover,
 .crit-btn.more:hover,
 .crit-btn.view:hover {
     color: var(--primary-colour);
@@ -203,6 +219,7 @@
 
 .crit-btn.comment:hover .crit_icon,
 .crit-btn.share:hover .crit_icon,
+.crit-btn.bookmark:hover .crit_icon,
 .crit-btn.more:hover .crit_icon,
 .crit-btn.view:hover .crit_icon {
     color: var(--primary-colour);
@@ -219,6 +236,7 @@
 
 .crit-btn.comment:hover .icon-container::after,
 .crit-btn.share:hover .icon-container::after,
+.crit-btn.bookmark:hover .icon-container::after,
 .crit-btn.more:hover .icon-container::after,
 .crit-btn.view:hover .icon-container::after {
     background-color: rgba(29, 155, 240, 0.1);
