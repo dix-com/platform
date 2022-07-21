@@ -9,7 +9,24 @@ import {
     CellMeasurerCache,
 } from "react-virtualized";
 
+import {
+    useGetUserCritsQuery,
+    useGetUserRepliesQuery,
+    useGetUserLikesQuery,
+    useGetUserMediaQuery,
+} from "../../../store/api/userApi";
+
+import withQuery from "./withQuery";
+import Crit from "../../critter/Crit";
+
 import { Spinner, Placeholder } from "../../index";
+
+import {
+    profileTimelineText,
+    repliesText,
+    mediaText,
+    likesText,
+} from "../../../config/placeholder";
 
 const cache = new CellMeasurerCache({
     fixedWidth: true,
@@ -96,5 +113,18 @@ const PreviewList = ({
         </section>
     );
 };
+
+const withCritQuery = (query, placeholder, paramSelector) => () =>
+    withQuery(query, Crit, placeholder, paramSelector)(PreviewList);
+
+const ProfileTimelineList = withCritQuery(useGetUserCritsQuery, profileTimelineText)();
+
+const RepliesList = withCritQuery(useGetUserRepliesQuery, repliesText)();
+
+const MediaList = withCritQuery(useGetUserMediaQuery, mediaText)();
+
+const LikesList = withCritQuery(useGetUserLikesQuery, likesText)();
+
+export { ProfileTimelineList, RepliesList, MediaList, LikesList };
 
 export default PreviewList;
