@@ -14,10 +14,13 @@ import {
     useGetUserRepliesQuery,
     useGetUserLikesQuery,
     useGetUserMediaQuery,
+    useGetUserFollowersQuery,
+    useGetUserFollowingQuery,
 } from "../../../store/api/userApi";
 
 import withQuery from "./withQuery";
 import Crit from "../../critter/Crit";
+import UserPreview from "../UserPreview";
 
 import { Spinner, Placeholder } from "../../index";
 
@@ -26,6 +29,8 @@ import {
     repliesText,
     mediaText,
     likesText,
+    followersListText,
+    followingListText,
 } from "../../../config/placeholder";
 
 const cache = new CellMeasurerCache({
@@ -114,8 +119,13 @@ const PreviewList = ({
     );
 };
 
+const selectUsername = (params) => ({ username: params.username });
+
 const withCritQuery = (query, placeholder, paramSelector) => () =>
     withQuery(query, Crit, placeholder, paramSelector)(PreviewList);
+
+const withUserQuery = (query, placeholder, paramSelector) => () =>
+    withQuery(query, UserPreview, placeholder, paramSelector)(PreviewList);
 
 const ProfileTimelineList = withCritQuery(useGetUserCritsQuery, profileTimelineText)();
 
@@ -125,6 +135,10 @@ const MediaList = withCritQuery(useGetUserMediaQuery, mediaText)();
 
 const LikesList = withCritQuery(useGetUserLikesQuery, likesText)();
 
-export { ProfileTimelineList, RepliesList, MediaList, LikesList };
+const FollowersList = withUserQuery(useGetUserFollowersQuery, followersListText, selectUsername)();
+
+const FollowingList = withUserQuery(useGetUserFollowingQuery, followingListText, selectUsername)();
+
+export { ProfileTimelineList, RepliesList, MediaList, LikesList, FollowersList, FollowingList };
 
 export default PreviewList;
