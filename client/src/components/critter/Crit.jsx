@@ -178,7 +178,7 @@ const Crit = ({ crit }) => {
                             >
                                 <LinkButton
                                     type="button"
-                                    className="more-btn delete"
+                                    className="float-btn delete"
                                     onClick={handleCritDelete}
                                 >
                                     <div className="float-icon-container">
@@ -189,7 +189,7 @@ const Crit = ({ crit }) => {
 
                                 <LinkButton
                                     type="button"
-                                    className="more-btn"
+                                    className="float-btn"
                                     disabled
                                 >
                                     <div className="float-icon-container">
@@ -200,7 +200,7 @@ const Crit = ({ crit }) => {
 
                                 <LinkButton
                                     type="button"
-                                    className="more-btn"
+                                    className="float-btn"
                                     disabled
                                 >
                                     <div className="float-icon-container">
@@ -209,7 +209,7 @@ const Crit = ({ crit }) => {
                                     Change who can reply
                                 </LinkButton>
                                 <LinkButton
-                                    className="more-btn"
+                                    className="float-btn"
                                     to={`/${crit.author.username}/status/${crit._id}/quotes`}
                                     state={{ previousPath: pathname }}
                                 >
@@ -229,7 +229,7 @@ const Crit = ({ crit }) => {
                             >
                                 <LinkButton
                                     type="button"
-                                    className="more-btn"
+                                    className="float-btn"
                                     onClick={handleFollow}
                                 >
                                     <div className="float-icon-container">
@@ -245,7 +245,7 @@ const Crit = ({ crit }) => {
 
                                 <LinkButton
                                     type="button"
-                                    className="more-btn"
+                                    className="float-btn"
                                     disabled
                                 >
                                     <div className="float-icon-container">
@@ -257,7 +257,7 @@ const Crit = ({ crit }) => {
                                 <Link
                                     to={`/${crit.author.username}/status/${crit._id}/quotes`}
                                     state={{ previousPath: pathname }}
-                                    className="more-btn"
+                                    className="float-btn"
                                 >
                                     <div className="float-icon-container">
                                         <IoMdStats />
@@ -363,7 +363,7 @@ const Crit = ({ crit }) => {
                                     >
                                         <LinkButton
                                             type="button"
-                                            className="more-btn"
+                                            className="float-btn"
                                             onClick={handleRecrit}
                                         >
                                             <div className="float-icon-container">
@@ -375,7 +375,7 @@ const Crit = ({ crit }) => {
 
                                         <LinkButton
                                             type="button"
-                                            className="more-btn"
+                                            className="float-btn"
                                             onClick={openQuoteModal}
                                         >
                                             <div className="float-icon-container">
