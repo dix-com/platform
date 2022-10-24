@@ -26,10 +26,10 @@ const CritActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPreview })
     return (
         <div className="crit-actions">
             <div className="attachments">
-                <IconContext.Provider value={{ className: "crit-attachments_icon" }}>
+                <IconContext.Provider value={{ className: "icon crit-attachments_icon" }}>
                     <label
                         type="button"
-                        className="crit-attachments_button"
+                        className="crit-attachments_button blue_round-btn"
                     >
                         <input
                             type="file"
@@ -40,47 +40,59 @@ const CritActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPreview })
                             }}
                             onChange={handleFileChange}
                         />
-                        <PiImageSquareBold size="16" />
+                        <div className="icon-container">
+                            <PiImageSquareBold size="16" />
+                        </div>
                     </label>
 
                     <button
                         type="button"
-                        className="crit-attachments_button"
+                        className="crit-attachments_button blue_round-btn"
                         disabled
                     >
-                        <MdOutlineGifBox size="16" />
+                        <div className="icon-container">
+                            <MdOutlineGifBox size="16" />
+                        </div>
                     </button>
 
                     <button
                         type="button"
-                        className="crit-attachments_button"
+                        className="crit-attachments_button blue_round-btn"
                         disabled
                     >
-                        <MdOutlinePoll size="16" />
+                        <div className="icon-container">
+                            <MdOutlinePoll size="16" />
+                        </div>
                     </button>
 
                     <button
                         type="button"
-                        className="crit-attachments_button"
+                        className="crit-attachments_button blue_round-btn"
                         disabled
                     >
-                        <TbMoodSmile size="16" />
+                        <div className="icon-container">
+                            <TbMoodSmile size="16" />
+                        </div>
                     </button>
 
                     <button
                         type="button"
-                        className="crit-attachments_button"
+                        className="crit-attachments_button blue_round-btn"
                         disabled
                     >
-                        <TbCalendarTime size="16" />
+                        <div className="icon-container">
+                            <TbCalendarTime size="16" />
+                        </div>
                     </button>
 
                     <button
                         type="button"
-                        className="crit-attachments_button"
+                        className="crit-attachments_button blue_round-btn"
                         disabled
                     >
-                        <HiOutlineLocationMarker size="16" />
+                        <div className="icon-container">
+                            <HiOutlineLocationMarker size="16" />
+                        </div>
                     </button>
                 </IconContext.Provider>
             </div>

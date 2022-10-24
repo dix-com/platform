@@ -69,8 +69,6 @@ const Crit = ({ crit }) => {
     const [createBookmark, createBookmarkResult] = useCreateBookmarkMutation();
     const [deleteBookmark, deleteBookmarkResult] = useDeleteBookmarkMutation();
 
-    // console.log(currentUserInfo);
-    // console.log(crit);
     const isBookmarked = currentUserInfo.bookmarks.includes(crit._id);
     const isReposted = crit.recrits.includes(currentUser.id);
     const isLiked = crit.likes.includes(currentUser.id);
