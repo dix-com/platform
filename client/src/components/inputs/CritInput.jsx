@@ -26,7 +26,7 @@ const CritInput = ({
         textRef.current.style.height = "auto";
 
         // set the new height based on scrollHeight
-        textInputRef.current.style.height = `${textRef.current.scrollHeight || 32}px`;
+        textInputRef.current.style.height = `${textRef.current.scrollHeight || 24}px`;
         textRef.current.style.height = `${textRef.current.scrollHeight}px`;
     }, [crit]);
 
@@ -45,23 +45,26 @@ const CritInput = ({
                     type="text"
                     id="crit"
                     placeholder="What's happening?!"
+                    ref={inputRef}
                     maxLength={maxLength}
                     value={crit}
                     onChange={({ target }) => setCrit(target.value)}
                     onFocus={() => setExpanded && setExpanded(true)}
-                    ref={inputRef}
                 />
             </div>
 
             {mediaPreview && (
                 <div className="media-preview">
                     <button
-                        className="dark-round-btn"
+                        className="media-preview_close light_round-btn"
                         onClick={clearMedia}
                     >
-                        <IconContext.Provider value={{ className: "close_icon" }}>
-                            <IoMdClose size="20" />
-                        </IconContext.Provider>
+                        <div className="icon-container">
+                            <IoMdClose
+                                size="20"
+                                className="icon"
+                            />
+                        </div>
                     </button>
                     <img
                         src={mediaPreview}

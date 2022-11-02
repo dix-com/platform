@@ -13,7 +13,7 @@ import { useCheckAuthQuery } from "../../store/api/authApi";
 import { useGetUserInfoQuery } from "../../store/api/userApi";
 import { useCreateCritMutation } from "../../store/api/critApi";
 
-const CritForm = ({ forceExpand, maxLength = 280 }) => {
+const CritForm = ({ isReply, button, placeholder, forceExpand, maxLength = 280 }) => {
     const [crit, setCrit] = useState("");
     const [media, setMedia] = useState(null);
     const [mediaPreview, setMediaPreview] = useState(null);
@@ -76,13 +76,15 @@ const CritForm = ({ forceExpand, maxLength = 280 }) => {
 
             <div className="crit-input">
                 <div className={`crit-input_container ${expanded && "expanded"}`}>
-                    <button
-                        type="button"
-                        className="audience"
-                        disabled
-                    >
-                        Everyone
-                    </button>
+                    {!isReply && (
+                        <button
+                            type="button"
+                            className="audience"
+                            disabled
+                        >
+                            Everyone
+                        </button>
+                    )}
 
                     <CritInput
                         inputRef={inputRef}
@@ -95,12 +97,15 @@ const CritForm = ({ forceExpand, maxLength = 280 }) => {
                     {mediaPreview && (
                         <div className="media-preview">
                             <button
-                                className="dark-round-btn"
+                                className="media-preview_close dark_round-btn"
                                 onClick={clearMedia}
                             >
-                                <IconContext.Provider value={{ className: "close_icon" }}>
-                                    <IoMdClose size="20" />
-                                </IconContext.Provider>
+                                <div className="icon-container">
+                                    <IoMdClose
+                                        size="20"
+                                        className="icon"
+                                    />
+                                </div>
                             </button>
                             <img
                                 src={mediaPreview}
@@ -109,17 +114,19 @@ const CritForm = ({ forceExpand, maxLength = 280 }) => {
                         </div>
                     )}
 
-                    <button
-                        type="button"
-                        className="reply"
-                        disabled
-                    >
-                        <IconContext.Provider value={{ className: "reply_icon" }}>
-                            <IoEarth size="16" />
-                        </IconContext.Provider>
+                    {!isReply && (
+                        <button
+                            type="button"
+                            className="reply"
+                            disabled
+                        >
+                            <IconContext.Provider value={{ className: "reply_icon" }}>
+                                <IoEarth size="16" />
+                            </IconContext.Provider>
 
-                        <span className="reply-option">Everyone can reply</span>
-                    </button>
+                            <span className="reply-option">Everyone can reply</span>
+                        </button>
+                    )}
                 </div>
 
                 <CritActions
