@@ -18,6 +18,12 @@ import {
     useGetUserFollowingQuery,
 } from "../../../store/api/userApi";
 
+import {
+    useGetQuotesQuery,
+    useGetRepostUsersQuery,
+    useGetLikeUsersQuery,
+} from "../../../store/api/critApi";
+
 import withQuery from "../../../hoc/withQuery";
 import Crit from "../../critter/Crit";
 import UserPreview from "../UserPreview";
@@ -126,6 +132,12 @@ const UserFollowers = withUserQuery(useGetUserFollowersQuery, placeholders.follo
 
 const UserFollowings = withUserQuery(useGetUserFollowingQuery, placeholders.followings)();
 
+const QuoteEngagements = withCritQuery(useGetQuotesQuery, placeholders.quoteEngagements)();
+
+const RepostEngagments = withUserQuery(useGetRepostUsersQuery, placeholders.repostEngagements)();
+
+const LikeEngagements = withUserQuery(useGetLikeUsersQuery, placeholders.likeEngagements)();
+
 export {
     ProfileTimeline,
     RepliesTimeline,
@@ -133,6 +145,9 @@ export {
     LikesTimeline,
     UserFollowers,
     UserFollowings,
+    QuoteEngagements,
+    RepostEngagments,
+    LikeEngagements,
 };
 
 export default PreviewList;
