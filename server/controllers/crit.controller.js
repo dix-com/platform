@@ -1,28 +1,58 @@
+const { ObjectId } = require("mongoose").Types;
 const User = require("../models/User.model");
 const Crit = require("../models/Crit.model");
 const asyncHandler = require("../middlewares/asyncHandler");
 
+const paginate = require("../helpers/paginatePlugin");
+
+const critService = require("../services/crit.service");
+
 const { NotFoundError, ForbiddenError } = require("../utils/errors");
+const { isObjEmpty } = require("../utils/object");
+const pick = require("../utils/pick");
 
 const getCrit = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
 
-    const crit = await Crit.findById(critId).populate("author");
-
-    if (!crit) {
+    if (!(await Crit.exists({ _id: critId })))
         return next(new NotFoundError("The requested crit couldn't be found!"));
-    }
+
+    const crit = await critService.fetchById(critId);
 
     return res.status(200).json({
-        crit: crit || [],
+        crit,
+    });
+});
+
+const deleteCrit = asyncHandler(async (req, res, next) => {
+    const { critId } = req.params;
+
+    const crit = await Crit.findById(critId);
+    const critAuthorId = crit.author._id.toString();
+    const authUserId = req.user._id.toString();
+
+    if (!crit)
+        return next(
+            new NotFoundError("The crit couldn't be found in the database!")
+        );
+
+    if (critAuthorId !== authUserId)
+        return next(
+            new ForbiddenError("You are not authorized to delete this crit!")
+        );
+
+    await crit.deleteOne();
+
+    return res.status(200).json({
+        isCritDeleted: true,
     });
 });
 
 const createCrit = asyncHandler(async (req, res, next) => {
     const { content, author, replyTo = null, quoteTo = null } = req.body;
 
-    const mentions = content.match(/(@[a-zA-Z0-9_]+)/g);
-    const hashtags = content.match(/#\w+/g);
+    const mentions = content.match(/(@[a-zA-Z0-9_]+)/g) || [];
+    const hashtags = content.match(/#\w+/g) || [];
 
     const crit = new Crit({
         content,
@@ -33,21 +63,20 @@ const createCrit = asyncHandler(async (req, res, next) => {
         quoteTo,
     });
 
-    // check for a particular type of crit
+    // Check for the crit type
     if (quoteTo && !(await Crit.exists({ _id: quoteTo })))
         return next(new NotFoundError("Crit being quoted is not found!"));
 
     if (replyTo) {
         const originalCrit = await Crit.findById(replyTo);
 
-        if (!originalCrit) {
+        if (!originalCrit)
             return next(new NotFoundError("Crit being replied to is not found!"));
-        }
 
         await originalCrit.updateRepliesCount();
     }
 
-    // attach any incoming files
+    // Attach incoming files
     if (req.file) {
         crit.media = {
             url: `http://localhost:8080/${req.file.path}`,
@@ -55,30 +84,10 @@ const createCrit = asyncHandler(async (req, res, next) => {
         };
     }
 
-    const newCrit = await crit.save();
+    await crit.save();
 
     return res.status(200).json({
-        crit: newCrit,
-    });
-});
-
-const deleteCrit = asyncHandler(async (req, res, next) => {
-    const { critId } = req.params;
-
-    const crit = await Crit.findById(critId);
-
-    if (!crit) {
-        return next(new NotFoundError("Crit not found!"));
-    }
-
-    if (crit.author._id.toString() !== req.user._id.toString()) {
-        return next(new ForbiddenError("You are not authorized to delete this crit!"));
-    }
-
-    await crit.deleteOne();
-
-    return res.status(200).json({
-        message: "Crit deleted successfully!",
+        isCritAdded: true,
     });
 });
 
@@ -88,9 +97,7 @@ const createRepost = asyncHandler(async (req, res, next) => {
 
     const crit = await Crit.findById(critId);
 
-    if (!crit) {
-        return next(new NotFoundError("Crit not found!"));
-    }
+    if (!crit) next(new NotFoundError("Crit not found!"));
 
     const user = await User.findById(userId);
 
@@ -107,9 +114,7 @@ const deleteRepost = asyncHandler(async (req, res, next) => {
 
     const crit = await Crit.findById(critId);
 
-    if (!crit) {
-        return next(new NotFoundError("Crit not found!"));
-    }
+    if (!crit) next(new NotFoundError("Crit not found!"));
 
     const user = await User.findById(userId);
 
@@ -124,12 +129,10 @@ const likeCrit = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
     const critId = req.params.critId;
 
-    // addToSet: update the array only if the value doesn't exist yet
-    const crit = await Crit.findByIdAndUpdate(critId, { $addToSet: { likes: userId } });
+    const crit = await critService.createLike(critId, userId);
 
-    if (!crit) {
+    if (!crit)
         return next(new NotFoundError("The crit to be liked was not found!"));
-    }
 
     return res.status(200).json({
         isLiked: true,
@@ -140,11 +143,10 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
     const userId = req.user._id;
     const critId = req.params.critId;
 
-    const crit = await Crit.findByIdAndUpdate(critId, { $pull: { likes: userId } });
+    const crit = await critService.removeLike(critId, userId);
 
-    if (!crit) {
+    if (!crit)
         return next(new NotFoundError("The crit to be unliked was not found!"));
-    }
 
     return res.status(200).json({
         isLiked: false,
