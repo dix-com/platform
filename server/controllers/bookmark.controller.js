@@ -1,77 +1,71 @@
+const { ObjectId } = require("mongoose").Types;
 const User = require("../models/User.model");
+const Bookmark = require("../models/Bookmark.model");
 const Crit = require("../models/Crit.model");
 
-const { ObjectId } = require("mongoose").Types;
 const asyncHandler = require("../middlewares/asyncHandler");
-const paginate = require("../helpers/paginatePlugin");
-const { userCritSelector } = require("../helpers/selectors");
-const { userLookup, quoteLookup, replyLookup } = require("../helpers/aggregation");
-const { NotFoundError, UnauthorizedError } = require("../utils/errors");
+const bookmarkService = require("../services/bookmark.service");
+
+const {
+    NotFoundError,
+    UnauthorizedError,
+    BadRequestError,
+} = require("../utils/errors");
 
 const getBookmarks = asyncHandler(async (req, res, next) => {
+    const authUserId = new ObjectId("64b2c9b8acd7c63679fe9c76");
+
+    // const { _id: authUserId } = req.user;
     const { userId } = req.params;
 
     if (!(await User.exists({ _id: userId })))
-        return next(new NotFoundError("The user in the request could not be found!"));
+        return next(
+            new NotFoundError("The user in the request could not be found!")
+        );
 
     if (userId !== authUserId.toString())
-        return next(new UnauthorizedError("You are not authorized to bookmark this crit!"));
+        return next(
+            new UnauthorizedError("You are not authorized to bookmark this crit!")
+        );
 
-    const response = await paginate(
-        "User",
-        [
-            { $match: { _id: new ObjectId(userId) } },
-
-            {
-                $lookup: {
-                    from: "crits",
-                    localField: "bookmarks",
-                    foreignField: "_id",
-                    as: "bookmark",
-                },
-            },
-
-            {
-                $unwind: {
-                    path: "$bookmark",
-                    preserveNullAndEmptyArrays: true,
-                },
-            },
-
-            { $project: { document: "$bookmark" } },
-            { $replaceRoot: { newRoot: "$document" } },
-
-            ...userLookup,
-            ...quoteLookup,
-            ...replyLookup,
-
-            // { $project: { document: "$$ROOT", ...userCritSelector } },
-            // { $replaceRoot: { newRoot: "$document" } },
-        ],
+    const response = await bookmarkService.fetchUserBookmarks(
+        new ObjectId(userId),
         req.pagination
     );
-    console.log(response);
 
     return res.status(200).json(response);
 });
 
 const createBookmark = asyncHandler(async (req, res, next) => {
-    const { _id: authUserId } = req.user;
     const { userId } = req.params;
     const { critId } = req.body;
-
-    if (!(await Crit.exists({ _id: critId })))
-        next(new NotFoundError("The request crit could not be found!"));
+    const authUserId = req.user._id.toString();
 
     if (!(await User.exists({ _id: userId })))
-        next(new NotFoundError("The user in the request could not be found!"));
+        return next(new NotFoundError("The user could not be found!"));
 
-    if (userId !== authUserId.toString())
-        next(new UnauthorizedError("You are not authorized to bookmark this crit!"));
+    if (!(await Crit.exists({ _id: critId })))
+        return next(new NotFoundError("The crit could not be found!"));
 
-    await User.findByIdAndUpdate(userId, {
-        $addToSet: { bookmarks: critId },
-    });
+    console.log(userId, critId);
+
+    const data = {
+        user: new ObjectId(userId),
+        crit: new ObjectId(critId),
+    };
+
+    const b = await Bookmark.find({});
+    console.log(b);
+
+    if (
+        await Bookmark.exists({
+            user: userId,
+            crit: critId,
+        })
+    )
+        return next(new BadRequestError("You already bookmarked this crit!"));
+
+    await bookmarkService.createBookmark(userId, critId);
 
     return res.status(200).json({
         isBookmarked: true,
@@ -80,16 +74,18 @@ const createBookmark = asyncHandler(async (req, res, next) => {
 
 const deleteBookmark = asyncHandler(async (req, res, next) => {
     const { userId, critId } = req.params;
+    const authUserId = req.user._id.toString();
 
-    const user = await User.findByIdAndUpdate(
-        userId,
-        { $pull: { bookmarks: critId } },
-        { new: true }
-    );
+    if (!(await User.exists({ _id: userId })))
+        return next(new NotFoundError("The user could not be found!"));
 
-    if (!user) {
-        return next(new NotFoundError("The user in the request could not be found!"));
-    }
+    if (!(await Crit.exists({ _id: critId })))
+        return next(new NotFoundError("The crit could not be found!"));
+
+    if (userId !== authUserId)
+        return next(new UnauthorizedError("You are not authorized to do this!"));
+
+    await bookmarkService.deleteBookmark(authUserId, critId);
 
     return res.status(200).json({
         isBookmarked: false,
@@ -98,20 +94,15 @@ const deleteBookmark = asyncHandler(async (req, res, next) => {
 
 const deleteAllBookmarks = asyncHandler(async (req, res, next) => {
     const { userId } = req.params;
-    const currentUser = req.user;
-    const currentUserId = currentUser._id.toString();
+    const authUserId = req.user._id.toString();
 
     if (!(await User.exists({ _id: userId })))
-        return next(new NotFoundError("The user in the request could not be found!"));
+        return next(new NotFoundError("The user could not be found!"));
 
-    if (currentUserId !== userId)
-        return next(
-            new UnauthorizedError("You are not authorized to clear the bookmarks of this user!")
-        );
+    if (authUserId !== userId)
+        return next(new UnauthorizedError("You are not authorized to do this!"));
 
-    await User.findByIdAndUpdate(userId, {
-        $set: { bookmarks: [] },
-    });
+    await bookmarkService.deleteAllBookmarks(new ObjectId(userId));
 
     return res.status(200).json({
         bookmarksCleared: true,
