@@ -13,8 +13,8 @@ import {
     CritDetails,
     QuotePreview,
 } from "../../index";
-import { useCheckAuthQuery } from "../../../features/api/authApi";
-import { useGetUserInfoQuery } from "../../../features/api/userApi";
+
+import { useAppSelector } from "../../../app/store";
 import { useCreateCritMutation } from "../../../features/api/critApi";
 
 import { isObjEmpty } from "../../../utils/object";
@@ -27,15 +27,8 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
     const inputRef = useRef();
 
     const {
-        data: { data: currentUser },
-    } = useCheckAuthQuery();
-
-    const { id, profileImageURL } = useGetUserInfoQuery(currentUser?.username, {
-        selectFromResult: ({ data }) => ({
-            id: data?._id,
-            profileImageURL: data?.profileImageURL,
-        }),
-    });
+        user: { id, profileImageURL },
+    } = useAppSelector((state) => state.auth);
 
     const [createCrit] = useCreateCritMutation();
 

@@ -25,7 +25,8 @@ import {
     ConditionalLink,
 } from "../../index";
 
-import { useCheckAuthQuery } from "../../../features/api/authApi";
+import { useAppSelector } from "../../../app/store";
+
 import { useDeleteCritMutation } from "../../../features/api/critApi";
 import {
     useGetUserInfoQuery,
@@ -50,9 +51,7 @@ const Crit = ({ crit }) => {
     const navigate = useNavigate();
     const { pathname } = useLocation();
 
-    const {
-        data: { isAuthenticated, data: currentUser },
-    } = useCheckAuthQuery();
+    const { isAuth, user: currentUser } = useAppSelector((state) => state.auth);
 
     const { data: currentUserInfo } = useGetUserInfoQuery(currentUser?.username, {
         skip: !currentUser?.username,
@@ -80,7 +79,7 @@ const Crit = ({ crit }) => {
     const media = crit.media?.[0];
 
     const handlePostClick = (e) => {
-        return isAuthenticated && navigate(`/${crit.author.username}/status/${crit._id}`);
+        return isAuth && navigate(`/${crit.author.username}/status/${crit._id}`);
     };
 
     const handleCritDelete = async () => {
@@ -106,7 +105,9 @@ const Crit = ({ crit }) => {
     };
 
     const handleLike = async (e) => {
-        isLiked ? await unlikeCrit({ id: crit._id }) : await likeCrit({ id: crit._id });
+        isLiked
+            ? await unlikeCrit({ id: crit._id })
+            : await likeCrit({ id: crit._id });
     };
 
     const handleBookmark = async () => {
@@ -115,7 +116,9 @@ const Crit = ({ crit }) => {
             userId: currentUser.id,
         };
 
-        isBookmarked ? await deleteBookmark(bookmarkData) : await createBookmark(bookmarkData);
+        isBookmarked
+            ? await deleteBookmark(bookmarkData)
+            : await createBookmark(bookmarkData);
     };
 
     const handleFollow = async () => {
@@ -124,7 +127,9 @@ const Crit = ({ crit }) => {
             targetUserId: crit.author._id,
         };
 
-        isFollowingAuthor ? await unfollowUser(followData) : await followUser(followData);
+        isFollowingAuthor
+            ? await unfollowUser(followData)
+            : await followUser(followData);
     };
 
     const openReplyModal = () => setReplyModal(true);
@@ -162,9 +167,9 @@ const Crit = ({ crit }) => {
 
             <ConditionalLink
                 className="crit"
+                condition={isAuth}
                 to={`/${crit.author.username}/status/${crit._id}`}
                 state={{ previousPath: pathname }}
-                condition={isAuthenticated}
             >
                 {moreFloat && (
                     <IconContext.Provider value={{ className: "float-icon" }}>
@@ -232,9 +237,13 @@ const Crit = ({ crit }) => {
                                 >
                                     <div className="float-icon-container">
                                         {isFollowingAuthor ? (
-                                            <RiUserUnfollowLine style={{ strokeWidth: 0 }} />
+                                            <RiUserUnfollowLine
+                                                style={{ strokeWidth: 0 }}
+                                            />
                                         ) : (
-                                            <RiUserFollowLine style={{ strokeWidth: 0 }} />
+                                            <RiUserFollowLine
+                                                style={{ strokeWidth: 0 }}
+                                            />
                                         )}
                                     </div>
                                     {isFollowingAuthor ? "Unfollow" : "Follow"} @
@@ -341,7 +350,9 @@ const Crit = ({ crit }) => {
                         </LinkButton>
 
                         <LinkButton
-                            className={`crit-btn recrit ${isReposted && "applied"}`}
+                            className={`crit-btn recrit ${
+                                isReposted && "applied"
+                            }`}
                             onClick={openRecritFloat}
                         >
                             <div className="icon-container">
@@ -353,7 +364,9 @@ const Crit = ({ crit }) => {
                             </div>
 
                             {recritFloat && (
-                                <IconContext.Provider value={{ className: "float-icon" }}>
+                                <IconContext.Provider
+                                    value={{ className: "float-icon" }}
+                                >
                                     <FloatOptions
                                         isOpen={recritFloat}
                                         onClose={closeRecritFloat}
@@ -421,7 +434,11 @@ const Crit = ({ crit }) => {
                                 onClick={handleBookmark}
                             >
                                 <div className="icon-container">
-                                    {isBookmarked ? <BiSolidBookmark /> : <BiBookmark />}
+                                    {isBookmarked ? (
+                                        <BiSolidBookmark />
+                                    ) : (
+                                        <BiBookmark />
+                                    )}
                                 </div>
                             </LinkButton>
 
