@@ -6,6 +6,7 @@
 
 .crit-modal .modal-content {
     padding: 0 !important;
+    height: auto;
 }
 
 .crit-modal .modal-content .quote-preview {

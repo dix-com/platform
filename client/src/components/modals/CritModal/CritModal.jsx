@@ -11,7 +11,7 @@ import { useAppSelector } from "../../../app/store";
 import {
     ColumnHeader,
     BaseModal,
-    CritActions,
+    CritFormActions,
     CritInput,
     QuotePreview,
 } from "../../index";
@@ -111,7 +111,7 @@ const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
                     <span className="reply-option">Everyone can reply</span>
                 </button>
 
-                <CritActions
+                <CritFormActions
                     crit={crit}
                     setMedia={setMedia}
                     setMediaPreview={setMediaPreview}
