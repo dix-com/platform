@@ -130,7 +130,7 @@
     height: auto;
 } */
 
-.crit-btn.more {
+.blue_round-btn.more {
     margin-left: auto;
     margin-right: 0;
     padding: 0 !important;
@@ -179,6 +179,12 @@
 .crit .replyingTo {
     color: var(--grey);
     margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.crit .replyingTo-icon {
+    margin-right: 0.25rem;
 }
 
 .crit .replyingTo,

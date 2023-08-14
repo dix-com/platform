@@ -8,17 +8,17 @@ import { IoEarth } from "react-icons/io5";
 
 import useOutsideClick from "../../../hooks/useOutsideClick";
 
-import { CritInput, CritActions } from "../../index";
+import { CritInput, CritFormActions } from "../../index";
 
 import { useAppSelector } from "../../../app/store";
 import { useCreateCritMutation } from "../../../features/api/critApi";
 
 const CritForm = ({
-    isReply,
-    button,
-    placeholder,
+    replyTo,
     forceExpand,
     maxLength = 280,
+    buttonText = "Crit",
+    placeholder = "What's happening?",
 }) => {
     const [crit, setCrit] = useState("");
     const [media, setMedia] = useState(null);
@@ -40,6 +40,7 @@ const CritForm = ({
         formData.append("content", crit);
         formData.append("author", id);
         formData.append("media", media);
+        replyTo && formData.append("replyTo", replyTo);
 
         const result = await createCrit(formData).unwrap();
 
@@ -75,7 +76,7 @@ const CritForm = ({
 
             <div className="crit-input">
                 <div className={`crit-input_container ${expanded && "expanded"}`}>
-                    {!isReply && (
+                    {!replyTo && (
                         <button
                             type="button"
                             className="audience"
@@ -113,10 +114,10 @@ const CritForm = ({
                         </div>
                     )}
 
-                    {!isReply && (
+                    {!replyTo && (
                         <button
                             type="button"
-                            className="reply"
+                            className="reply_label"
                             disabled
                         >
                             <IconContext.Provider
@@ -130,7 +131,7 @@ const CritForm = ({
                     )}
                 </div>
 
-                <CritActions
+                <CritFormActions
                     maxLength={maxLength}
                     crit={crit}
                     setMedia={setMedia}

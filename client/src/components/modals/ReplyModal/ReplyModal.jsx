@@ -1,4 +1,4 @@
-import "../../ui/Crit/styles.css";
+import "../../ui/CritPreview/styles.css";
 import "./styles.css";
 
 import { useRef, useState } from "react";
@@ -9,7 +9,7 @@ import {
     ColumnHeader,
     CritText,
     CritInput,
-    CritActions,
+    CritFormActions,
     CritDetails,
     QuotePreview,
 } from "../../index";
@@ -118,7 +118,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
                 </div>
             </section>
 
-            <CritActions
+            <CritFormActions
                 crit={crit}
                 setMedia={setMedia}
                 setMediaPreview={setMediaPreview}

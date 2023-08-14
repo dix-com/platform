@@ -4,11 +4,11 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { IconContext } from "react-icons";
+import { LuRepeat2 } from "react-icons/lu";
 import { TbMessageCircle2, TbTrash, TbPinned } from "react-icons/tb";
 import { IoMdStats } from "react-icons/io";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { RiUserFollowLine, RiUserUnfollowLine } from "react-icons/ri";
-import { MdBlock } from "react-icons/md";
 
 import {
     CritText,
@@ -19,6 +19,7 @@ import {
     CritActions,
     QuotePreview,
     LinkButton,
+    MediaModal,
     ConditionalLink,
 } from "../../index";
 
@@ -34,6 +35,7 @@ import {
 import { isObjEmpty } from "../../../utils/object";
 
 const CritPreview = ({ crit, displayReply = true }) => {
+    const [mediaModal, setMediaModal] = useState(false);
     const [replyModal, setReplyModal] = useState(false);
     const [quoteModal, setQuoteModal] = useState(false);
     const [recritFloat, setRecritFloat] = useState(false);
@@ -54,8 +56,20 @@ const CritPreview = ({ crit, displayReply = true }) => {
 
     const isFollowingAuthor = crit.author.followers.includes(currentUser.id);
     const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
-    const isRecrit = crit.recrits.includes(currentUser.id);
     const isQuote = crit.quoteTo && !isObjEmpty(crit.quoteTo);
+    const isRecrit = crit.recrits.includes(currentUser.id);
+    // const isFollowerRecrit =
+
+    // viewing_user, author_user
+    // if viewing_user is current user // viewing own crits
+    //      if viewing_user is crit author
+    //          show recrit - "You reposted..."
+    //      else
+    //          show recrit - "[username] respoted"
+    //          
+    // else // not viewing own crits
+    //      
+
 
     const media = crit.media?.[0];
 
@@ -83,6 +97,9 @@ const CritPreview = ({ crit, displayReply = true }) => {
             : await followUser(followData);
     };
 
+    const openMediaModal = () => setMediaModal(true);
+    const closeMediaModal = () => setMediaModal(false);
+
     const openReplyModal = () => setReplyModal(true);
     const closeReplyModal = () => setReplyModal(false);
 
@@ -95,7 +112,6 @@ const CritPreview = ({ crit, displayReply = true }) => {
     const openMoreFloat = () => setMoreFloat(true);
     const closeMoreFloat = () => setMoreFloat(false);
 
-    console.log(crit, currentUser);
 
     return (
         <IconContext.Provider value={{ className: "crit_icon" }}>
@@ -112,6 +128,14 @@ const CritPreview = ({ crit, displayReply = true }) => {
                     isOpen={quoteModal}
                     onClose={closeQuoteModal}
                     quote={crit}
+                />
+            )}
+
+            {mediaModal && (
+                <MediaModal
+                    isOpen={mediaModal}
+                    closeMediaModal={closeMediaModal}
+                    mediaUrl={media.url}
                 />
             )}
 
@@ -215,16 +239,20 @@ const CritPreview = ({ crit, displayReply = true }) => {
                 </div>
 
                 <div className="crit-container">
-                    {/* {username} recrited */}
-                    {isRecrit && <span className="replyingTo">You recrited</span>}
+                    {isRecrit && (
+                        <span className="replyingTo">
+                            <LuRepeat2 className="replyingTo-icon" />
+                            You recrited
+                        </span>
+                    )}
 
                     <CritDetails crit={crit}>
                         <LinkButton
-                            className="crit-btn more"
+                            className="blue_round-btn more"
                             onClick={openMoreFloat}
                         >
                             <div className="icon-container">
-                                <IoEllipsisHorizontal size="16" />
+                                <IoEllipsisHorizontal size="16" className="icon" />
                             </div>
                         </LinkButton>
                     </CritDetails>
@@ -246,13 +274,16 @@ const CritPreview = ({ crit, displayReply = true }) => {
                         <CritText text={crit.content} />
 
                         {media && (
-                            <div className="media-container">
+                            <LinkButton
+                                className="media-container"
+                                onClick={openMediaModal}
+                            >
                                 <img
                                     src={media.url}
                                     className="crit_media"
                                     alt="Crit Media"
                                 />
-                            </div>
+                            </LinkButton>
                         )}
                     </div>
 

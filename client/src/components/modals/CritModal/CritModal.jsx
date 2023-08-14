@@ -57,8 +57,6 @@ const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
         setMediaPreview(null);
     };
 
-    console.log(quote);
-
     return (
         <BaseModal
             isOpen={isOpen}
@@ -101,7 +99,7 @@ const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
 
                 <button
                     type="button"
-                    className="reply"
+                    className="reply_label"
                     disabled
                 >
                     <IconContext.Provider value={{ className: "reply_icon" }}>
