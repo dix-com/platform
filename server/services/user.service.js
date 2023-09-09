@@ -1,4 +1,5 @@
 const User = require("../models/User.model");
+const Crit = require("../models/Crit.model");
 const paginate = require("../helpers/paginatePlugin");
 
 const {
@@ -9,11 +10,12 @@ const {
     postDetailSelector,
 } = require("../helpers/selectors");
 
+
+
+
 const findByUsername = async (username) => {
     const user = await User.findOne({ username }).populate("bookmarks");
 
-    console.log(username);
-    console.log(user);
     const bookmarks = user.bookmarks.map((bookmark) => bookmark.crit);
     user.bookmarks = bookmarks;
 
@@ -30,17 +32,78 @@ const findByIdentifier = async (identifier, options = {}) => {
     return await user.exec();
 };
 
+
+const fetchHomeFeed = async (userId, options) => {
+    return await paginate(
+        "User",
+        [
+            {
+                $match: {
+                    _id: userId,
+                },
+            },
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "following",
+                    foreignField: "author",
+                    as: "followingCrits",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$followingCrits",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "followingCrits.author",
+                    foreignField: "_id",
+                    as: "followingCrits.author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$followingCrits.author",
+                    // preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $project: {
+                    document: "$$ROOT.followingCrits",
+                },
+            },
+            {
+                $replaceRoot: { newRoot: "$document" },
+            },
+            {
+                $project: {
+                    replies: 1,
+                    ...postAuthorSelector,
+                    ...postDetailSelector,
+                },
+            },
+        ],
+        options
+    );
+};
+
+
 const fetchTimeline = async (userId, options) => {
     return await paginate(
         "Crit",
         [
             {
                 $match: {
-                    $and: [
-                        { author: userId },
+                    $or: [
                         {
-                            $or: [
-                                { recrits: { $in: [userId] } },
+                            recrits: { $in: [userId] }
+                        },
+                        {
+                            $and: [
+                                { author: userId },
                                 { replyTo: { $eq: null } },
                             ],
                         },
@@ -114,17 +177,12 @@ const fetchRepliesTimeline = async (userId, options) => {
             {
                 $match: {
                     author: userId,
-                    $or: [{ replyTo: { $ne: null } }, { quoteTo: { $ne: null } }],
+                    $or: [
+                        { replyTo: { $ne: null } },
+                        { quoteTo: { $ne: null } }
+                    ],
                 },
             },
-
-            // {
-            //     $unwind: {
-            //         path: "$recrits",
-            //         preserveNullAndEmptyArrays: true,
-            //     },
-            // },
-
             {
                 $lookup: {
                     from: "users",
@@ -409,7 +467,7 @@ const fetchFollowers = async (userId, options) => {
             {
                 $unwind: {
                     path: "$follows",
-                    preserveNullAndEmptyArrays: true,
+                    // preserveNullAndEmptyArrays: true,
                 },
             },
 
@@ -436,7 +494,7 @@ const fetchFollowing = async (userId, options) => {
             {
                 $unwind: {
                     path: "$follows",
-                    preserveNullAndEmptyArrays: true,
+                    // preserveNullAndEmptyArrays: true,
                 },
             },
 
@@ -465,6 +523,7 @@ module.exports = {
     findByIdentifier,
     fetchFollowers,
     fetchFollowing,
+    fetchHomeFeed,
     fetchTimeline,
     fetchRepliesTimeline,
     fetchMediaTimeline,

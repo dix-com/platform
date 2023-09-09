@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const User = require("./User.model");
+const Bookmark = require("./Bookmark.model");
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
@@ -11,9 +13,7 @@ const critSchema = new Schema(
             trim: true,
             maxLength: [280, "The crit can't be longer than 280 characters."],
             validate: {
-                validator: (c) => {
-                    return c.trim().length > 0;
-                },
+                validator: (c) => c.trim().length > 0,
                 message: "The crit can't be empty.",
             },
         },
@@ -45,11 +45,6 @@ const critSchema = new Schema(
             type: [String],
             default: [],
             set: (hashtags) => hashtags.map((h) => h.toLowerCase().replace("#", "")),
-        },
-        visibility: {
-            type: String,
-            enum: ["EVERYONE", "FOLLOWED", "MENTIONED"],
-            default: "EVERYONE",
         },
         replyTo: {
             type: ObjectId,
@@ -110,6 +105,34 @@ critSchema.methods.deleteRecrit = function (userId) {
 
     return Promise.resolve(this);
 };
+
+/**
+ *
+ * Middleware
+ *
+ */
+
+critSchema.pre('deleteOne', async function (next) {
+    const Crit = this.model('Crit');
+    const critId = this.getQuery()['_id'];
+
+    await Crit.deleteMany({
+        $or: [
+            { replyTo: critId },
+            { quoteTo: critId }
+        ]
+    });
+
+    await Bookmark.deleteMany({ crit: critId });
+
+    await User.updateMany(
+        { recrits: critId },
+        { $pull: { recrits: critId } }
+    );
+
+    next();
+});
+
 
 const Crit = mongoose.model("Crit", critSchema);
 

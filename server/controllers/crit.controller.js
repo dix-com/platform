@@ -2,10 +2,10 @@ const { ObjectId } = require("mongoose").Types;
 const User = require("../models/User.model");
 const Crit = require("../models/Crit.model");
 const asyncHandler = require("../middlewares/asyncHandler");
+const critService = require("../services/crit.service");
 
 const paginate = require("../helpers/paginatePlugin");
-
-const critService = require("../services/crit.service");
+const { engagementSelector } = require("../helpers/selectors");
 
 const { NotFoundError, ForbiddenError } = require("../utils/errors");
 const { isObjEmpty } = require("../utils/object");
@@ -24,28 +24,51 @@ const getCrit = asyncHandler(async (req, res, next) => {
     });
 });
 
-const deleteCrit = asyncHandler(async (req, res, next) => {
+
+const getCritEngagement = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
 
-    const crit = await Crit.findById(critId);
-    const critAuthorId = crit.author._id.toString();
-    const authUserId = req.user._id.toString();
+    const query = pick(req.query, ["quotes", "recrits", "likes"]);
 
-    if (!crit)
-        return next(
-            new NotFoundError("The crit couldn't be found in the database!")
-        );
+    const isQueryEmpty = isObjEmpty(query);
 
-    if (critAuthorId !== authUserId)
-        return next(
-            new ForbiddenError("You are not authorized to delete this crit!")
-        );
+    if (isQueryEmpty)
+        return next(new BadRequestError("Invalid query parameters!"));
 
-    await crit.deleteOne();
+    if (!(await Crit.exists({ _id: critId })))
+        return next(new NotFoundError("Crit with such ID doesn't exist!"));
 
-    return res.status(200).json({
-        isCritDeleted: true,
-    });
+    const parsedId = new ObjectId(critId);
+
+    const field = query.likes ? "likes" : query.recrits ? "recrits" : "quotes";
+    const filter = field === "quotes" ? { quoteTo: parsedId } : { _id: parsedId };
+
+    const response = await paginate(
+        "Crit",
+        [
+            { $match: filter },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: `${field}`,
+                    foreignField: "_id",
+                    as: `${field}`,
+                },
+            },
+            {
+                $unwind: {
+                    path: `$${field}`,
+                },
+            },
+
+            { $replaceRoot: { newRoot: `$${field}` } },
+            { $project: { ...engagementSelector } },
+        ],
+        req.pagination
+    );
+
+    return res.status(200).json(response);
 });
 
 const createCrit = asyncHandler(async (req, res, next) => {
@@ -54,17 +77,23 @@ const createCrit = asyncHandler(async (req, res, next) => {
     const mentions = content.match(/(@[a-zA-Z0-9_]+)/g) || [];
     const hashtags = content.match(/#\w+/g) || [];
 
-    const crit = new Crit({
+    const data = {
         content,
         author,
         mentions,
         hashtags,
         replyTo,
         quoteTo,
-    });
+    };
 
-    // Check for the crit type
+    // Check the crit type
+    if (replyTo && quoteTo)
+        return next(new ForbiddenError("Crit can't be both a reply and a quote!"));
+
     if (quoteTo && !(await Crit.exists({ _id: quoteTo })))
+        return next(new NotFoundError("Crit being quoted is not found!"));
+
+    if (replyTo && !(await Crit.exists({ _id: replyTo })))
         return next(new NotFoundError("Crit being quoted is not found!"));
 
     if (replyTo) {
@@ -78,16 +107,36 @@ const createCrit = asyncHandler(async (req, res, next) => {
 
     // Attach incoming files
     if (req.file) {
-        crit.media = {
-            url: `${process.env.SERVER_ORIGIN}/${req.file.path}`,
+        data.media = {
+            url: `${process.env.API_URL}/${req.file.path}`,
             mediaType: req.file.mimetype.split("/")[0],
         };
     }
 
-    await crit.save();
+    await critService.createCrit(data);
 
     return res.status(200).json({
-        isCritAdded: true,
+        isCritCreated: true,
+    });
+});
+
+const deleteCrit = asyncHandler(async (req, res, next) => {
+    const { critId } = req.params;
+
+    const crit = await Crit.findById(critId);
+    const critAuthorId = crit.author._id.toString();
+    const authUserId = req.user._id.toString();
+
+    if (!crit)
+        return next(new NotFoundError("The crit couldn't be found in the database!"));
+
+    if (critAuthorId !== authUserId)
+        return next(new ForbiddenError("You are not authorized to delete this crit!"));
+
+    await crit.deleteOne();
+
+    return res.status(200).json({
+        isCritDeleted: true,
     });
 });
 
@@ -97,7 +146,8 @@ const createRepost = asyncHandler(async (req, res, next) => {
 
     const crit = await Crit.findById(critId);
 
-    if (!crit) next(new NotFoundError("Crit not found!"));
+    if (!crit)
+        return next(new NotFoundError("Crit not found!"));
 
     const user = await User.findById(userId);
 
@@ -118,7 +168,10 @@ const deleteRepost = asyncHandler(async (req, res, next) => {
 
     const user = await User.findById(userId);
 
-    await Promise.all([crit.deleteRecrit(userId), user.deleteRecrit(critId)]);
+    await Promise.all([
+        crit.deleteRecrit(userId),
+        user.deleteRecrit(critId)
+    ]);
 
     return res.status(200).json({
         isReposted: false,
@@ -155,6 +208,7 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
 
 module.exports = {
     getCrit,
+    getCritEngagement,
     createCrit,
     createRepost,
     likeCrit,

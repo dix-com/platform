@@ -45,6 +45,7 @@ export const critApi = baseApi.injectEndpoints({
 
 export const {
     useGetCritQuery,
+    useGetHomeTimelineQuery,
     useCreateCritMutation,
     useDeleteCritMutation,
     useGetQuotesQuery,

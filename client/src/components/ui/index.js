@@ -1,11 +1,11 @@
 export { default as FloatOptions } from "./FloatOptions";
-export { default as PreviewList } from "./PreviewList";
-export * from "./PreviewList";
+export { default as PaginatedList } from "./PaginatedList";
 export { default as QuotePreview } from "./QuotePreview";
-export { default as TabList } from "./TabList";
-export { default as Crit } from "./Crit";
+export { default as PaginatedTabList } from "./PaginatedTabList";
+export { default as CritPreview } from "./CritPreview";
 export { default as CritActions } from "./CritActions";
 export { default as CritForm } from "./CritForm";
+export { default as CritFormActions } from "./CritFormActions";
 export { default as CritInput } from "./CritInput";
 export { default as CritText } from "./CritText";
 export { default as UserPreview } from "./UserPreview";

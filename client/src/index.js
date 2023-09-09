@@ -5,28 +5,20 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 
+import { AppLayout } from "./components";
+
 import Root from "./routes/Root";
+import NotFound from "./routes/NotFound";
 import Login from "./routes/Login";
 import Home from "./routes/Home";
-import NotFound from "./routes/NotFound";
 import Profile from "./routes/Profile";
-import TabRoute from "./routes/TabRoute";
+import ProfileTabList from "./routes/Profile/ProfileTabList";
+import ProfileConnections from "./routes/Profile/ProfileConnections";
+import CritEngagements from "./routes/Crit/CritEngagements";
 import Bookmarks from "./routes/Bookmarks";
 
 import PrivateRoute from "./routes/PrivateRoute";
 import PublicRoute from "./routes/PublicRoute";
-
-import {
-    ProfileTimeline,
-    RepliesTimeline,
-    MediaTimeline,
-    LikesTimeline,
-    UserFollowers,
-    UserFollowings,
-    QuoteEngagements,
-    RepostEngagments,
-    LikeEngagements,
-} from "./components/index";
 
 import store from "./app/store";
 
@@ -37,7 +29,6 @@ const router = createBrowserRouter([
         errorElement: <NotFound />,
         children: [
             {
-                path: "/",
                 index: true,
                 element: (
                     <PublicRoute>
@@ -46,102 +37,66 @@ const router = createBrowserRouter([
                 ),
             },
             {
-                path: "/home",
-                element: (
-                    <PrivateRoute>
-                        <Home />
-                    </PrivateRoute>
-                ),
-            },
-            {
-                path: "/:username",
-                element: (
-                    <PrivateRoute>
-                        <Profile />
-                    </PrivateRoute>
-                ),
+                path: "/",
+                element: <AppLayout />,
                 children: [
                     {
-                        path: "",
-                        element: <ProfileTimeline />,
+                        path: "/home",
+                        element: (
+                            <PrivateRoute>
+                                <Home />
+                            </PrivateRoute>
+                        ),
                     },
                     {
-                        path: "replies",
-                        element: <RepliesTimeline />,
+                        path: "/:username",
+                        element: (
+                            <PrivateRoute>
+                                <Profile />
+                            </PrivateRoute>
+                        ),
+                        children: [
+                            ...[
+                                '',
+                                'replies',
+                                'media',
+                                'likes'
+                            ].map(path => ({
+                                path: path,
+                                element: <ProfileTabList />
+                            }))
+                        ],
                     },
-                    {
-                        path: "media",
-                        element: <MediaTimeline />,
-                    },
-                    {
-                        path: "likes",
-                        element: <LikesTimeline />,
-                    },
-                ],
-            },
-            {
-                path: "/:username/followers",
-                element: (
-                    <TabRoute
-                        tabs={["followers", "following"]}
-                        context={{
-                            selector: { arg: "username", param: "username" },
-                        }}
-                    />
-                ),
-                children: [{ path: "", element: <UserFollowers /> }],
-            },
-            {
-                path: "/:username/following",
-                element: (
-                    <TabRoute
-                        tabs={["followers", "following"]}
-                        context={{
-                            selector: { arg: "username", param: "username" },
-                        }}
-                    />
-                ),
-                children: [{ path: "", element: <UserFollowings /> }],
-            },
+                    ...[
+                        '/:username/followers',
+                        '/:username/following'
+                    ].map(path => ({
+                        path: path,
+                        element: <ProfileConnections />
+                    })),
 
-            {
-                path: "/:username/status/:critId/quotes",
-                element: (
-                    <TabRoute
-                        tabs={["quotes", "recrits", "likes"]}
-                        context={{ selector: { arg: "id", param: "critId" } }}
-                    />
-                ),
-                children: [{ path: "", element: <QuoteEngagements /> }],
+                    ...[
+                        '/:username/status/:critId/quotes',
+                        '/:username/status/:critId/reposts',
+                        '/:username/status/:critId/likes'
+                    ].map(path => ({
+                        path: path,
+                        element: <CritEngagements />
+                    })),
+                    {
+                        path: "/bookmarks",
+                        element: (
+                            <PrivateRoute>
+                                <Bookmarks />
+                            </PrivateRoute>
+                        ),
+                    },
+                ]
             },
             {
-                path: "/:username/status/:critId/recrits",
-                element: (
-                    <TabRoute
-                        tabs={["quotes", "recrits", "likes"]}
-                        context={{ selector: { arg: "id", param: "critId" } }}
-                    />
-                ),
-                children: [{ path: "", element: <RepostEngagments /> }],
-            },
-            {
-                path: "/:username/status/:critId/likes",
-                element: (
-                    <TabRoute
-                        tabs={["quotes", "recrits", "likes"]}
-                        context={{ selector: { arg: "id", param: "critId" } }}
-                    />
-                ),
-                children: [{ path: "", element: <LikeEngagements /> }],
-            },
-            {
-                path: "/bookmarks",
-                element: (
-                    <PrivateRoute>
-                        <Bookmarks />
-                    </PrivateRoute>
-                ),
-            },
+                path: "*",
+                element: <NotFound />,
+            }
         ],
     },
 ]);
