@@ -10,6 +10,7 @@ const fetchUserBookmarks = async (userId, options) => {
         [
             { $match: { user: userId } },
 
+
             {
                 $lookup: {
                     from: "crits",
@@ -18,13 +19,26 @@ const fetchUserBookmarks = async (userId, options) => {
                     as: "critDetails",
                 },
             },
+
+
             {
                 $unwind: "$critDetails",
             },
 
             {
-                $replaceRoot: { newRoot: "$critDetails" },
+                $addFields: {
+                    bookmarkCreatedAt: "$createdAt"
+                }
             },
+
+            {
+                $replaceRoot: {
+                    newRoot: {
+                        $mergeObjects: ["$critDetails", { bookmarkCreatedAt: "$bookmarkCreatedAt" }]
+                    }
+                }
+            },
+
 
             {
                 $lookup: {
@@ -37,6 +51,7 @@ const fetchUserBookmarks = async (userId, options) => {
             {
                 $unwind: {
                     path: "$author",
+                    preserveNullAndEmptyArrays: true,
                 },
             },
 
@@ -102,20 +117,31 @@ const fetchUserBookmarks = async (userId, options) => {
 
             {
                 $project: {
-                    ...userCritSelector,
+                    bookmarkCreatedAt: 1,
+                    ...userCritSelector
                 },
             },
         ],
-        options
+        {
+            ...options,
+            sortBy: { bookmarkCreatedAt: -1 },
+        }
+
     );
 };
 
 const createBookmark = async (userId, critId) => {
-    await Bookmark.create({ user: userId, crit: critId });
+    await Bookmark.create({
+        user: userId,
+        crit: critId
+    });
 };
 
 const deleteBookmark = async (userId, critId) => {
-    await Bookmark.deleteOne({ user: userId, crit: critId });
+    await Bookmark.deleteOne({
+        user: userId,
+        crit: critId
+    });
 };
 
 const deleteAllBookmarks = async (userId) => {

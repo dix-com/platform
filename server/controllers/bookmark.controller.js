@@ -47,16 +47,6 @@ const createBookmark = asyncHandler(async (req, res, next) => {
     if (!(await Crit.exists({ _id: critId })))
         return next(new NotFoundError("The crit could not be found!"));
 
-    console.log(userId, critId);
-
-    const data = {
-        user: new ObjectId(userId),
-        crit: new ObjectId(critId),
-    };
-
-    const b = await Bookmark.find({});
-    console.log(b);
-
     if (
         await Bookmark.exists({
             user: userId,
