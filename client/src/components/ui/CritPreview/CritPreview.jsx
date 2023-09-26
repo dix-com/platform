@@ -112,6 +112,7 @@ const CritPreview = ({ crit, displayReply = true }) => {
     const openMoreFloat = () => setMoreFloat(true);
     const closeMoreFloat = () => setMoreFloat(false);
 
+    console.log(crit, currentUser.id);
 
     return (
         <IconContext.Provider value={{ className: "crit_icon" }}>

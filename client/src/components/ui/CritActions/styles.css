@@ -19,10 +19,18 @@
     stroke-width: unset !important;
 }
 
-.crit-actions .crit-btn .float-options {
-    bottom: -50px !important;
+.action-btn {
+    position: relative;
+}
+
+.crit-actions .action-btn .recrit-options {
+    top: -10px !important;
     left: -10px !important;
-    width: 200px;
+    width: 135px !important;
+}
+
+.crit-actions .action-btn .recrit-options .float-icon-container {
+    width: 30px !important;
 }
 
 .action-btn .count-container {

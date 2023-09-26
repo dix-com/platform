@@ -1,17 +1,19 @@
 import "./styles.css";
 
-import { Link } from "react-router-dom";
-
+import { Link, useLocation } from "react-router-dom";
 import { CritDetails } from "../../index";
 import { isObjEmpty } from "../../../utils/object";
 
 const QuotePreview = ({ crit }) => {
+    const { pathname } = useLocation();
+
     const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
     const media = crit.media?.[0];
 
     return (
         <Link
             to={`/${crit.author.username}/status/${crit._id}`}
+            state={{ previousPath: pathname }}
             className="quote-preview"
         >
             <div className="details-wrapper">
@@ -38,7 +40,7 @@ const QuotePreview = ({ crit }) => {
                 </div>
 
                 {media && (
-                    <div className="media-container">
+                    <div className="media-container quote-media">
                         <img
                             src={media.url}
                             className="crit_media"

@@ -8,3 +8,5 @@ export { default as Placeholder } from "./Placeholder";
 export { default as TextInput } from "./TextInput";
 export { default as Spinner } from "./Spinner";
 export { default as CritDetails } from "./CritDetails";
+export { default as InputAccentRadio } from "./InputAccentRadio";
+export { default as InputThemeRadio } from "./InputThemeRadio";

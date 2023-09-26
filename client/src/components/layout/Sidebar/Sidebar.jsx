@@ -1,8 +1,8 @@
-import logo from "../../../assets/logo-white.png";
+import logo from "../../../assets/logo.svg";
 
+import classNames from "classnames";
 import { useState } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
-
 import { IconContext } from "react-icons";
 import {
     BiSearch,
@@ -22,19 +22,33 @@ import { FaFeatherAlt } from "react-icons/fa";
 import { IoEllipsisHorizontal } from "react-icons/io5";
 import { PiDotsThreeCircle } from "react-icons/pi";
 import { IoMdCheckmark } from "react-icons/io";
+import { HiOutlinePencilAlt } from "react-icons/hi";
+import { FaEarthAmericas } from "react-icons/fa6";
 
+import useModal from "../../../hooks/useModal";
+import { useTheme } from "../../../contexts/ThemeProvider";
 import { useAppSelector, useAppDispatch } from "../../../app/store";
 import { authActions } from "../../../features/slices/authSlice";
 import { useLazySignOutQuery } from "../../../features/api/authApi";
 
-import { FloatOptions, CritModal } from "../../index";
+import { FloatOptions, CritModal, DisplayModal } from "../../index";
+
 
 const Sidebar = () => {
+    const [critModal, setCritModal] = useState(false);
+    const [moreFloat, setMoreFloat] = useState(false);
+    const [accountFloat, setAccountFloat] = useState(false);
+
+    const { theme } = useTheme();
+
+    const {
+        isOpen: displayModal,
+        openModal: openDisplayModal,
+        closeModal: closeDisplayModal
+    } = useModal();
+
     const { user: currentUser } = useAppSelector((state) => state.auth);
     const dispatch = useAppDispatch();
-
-    const [critModal, setCritModal] = useState(false);
-    const [accountFloat, setAccountFloat] = useState(false);
 
     const { pathname } = useLocation();
     const navigate = useNavigate();
@@ -45,6 +59,10 @@ const Sidebar = () => {
     const closeCritModal = () => setCritModal(false);
     const openAccountFloat = () => setAccountFloat(true);
     const closeAccountFloat = () => setAccountFloat(false);
+    const openMoreFloat = () => setMoreFloat(true);
+    const closeMoreFloat = () => {
+        setMoreFloat(false);
+    };
 
     const handleSignOut = async () => {
         const result = await signOut();
@@ -68,6 +86,13 @@ const Sidebar = () => {
                 />
             )}
 
+            {displayModal && (
+                <DisplayModal
+                    isOpen={displayModal}
+                    onClose={closeDisplayModal}
+                />
+            )}
+
             <div className="sticky-wrapper">
                 <NavLink
                     to={`/`}
@@ -75,6 +100,10 @@ const Sidebar = () => {
                 >
                     <img
                         src={logo}
+                        className={classNames("logo", {
+                            dark: theme === "dim" || theme === "dark",
+                            light: theme === "light"
+                        })}
                         alt="Logo"
                     />
                 </NavLink>
@@ -124,6 +153,7 @@ const Sidebar = () => {
                                 </>
                             )}
                             state={{ previousPath: pathname }}
+                            disabled
                         />
 
                         <NavLink
@@ -140,6 +170,7 @@ const Sidebar = () => {
                                 </>
                             )}
                             state={{ previousPath: pathname }}
+                            disabled
                         />
 
                         <NavLink
@@ -176,6 +207,43 @@ const Sidebar = () => {
 
                         <button
                             type="button"
+                            className="navbar-link"
+                            onClick={openMoreFloat}
+                        >
+                            <IconContext.Provider value={{ className: "navbar_icon settings" }}>
+                                <PiDotsThreeCircle size="25" />
+                            </IconContext.Provider>
+
+                            <span className="text">More</span>
+
+                            {moreFloat && (
+                                <FloatOptions
+                                    isOpen={moreFloat}
+                                    onClose={closeMoreFloat}
+                                    className="more-options"
+                                >
+                                    <Link
+                                        to={``}
+                                        className="float-btn"
+                                    >
+                                        <FaEarthAmericas />
+                                        Connect
+                                    </Link>
+
+                                    <button
+                                        type="button"
+                                        className="float-btn"
+                                        onClick={openDisplayModal}
+                                    >
+                                        <HiOutlinePencilAlt style={{ strokeWidth: "2" }} />
+                                        Display
+                                    </button>
+                                </FloatOptions>
+                            )}
+                        </button>
+
+                        <button
+                            type="button"
                             className="blue-btn navbar-btn"
                             onClick={openCritModal}
                         >
@@ -186,6 +254,8 @@ const Sidebar = () => {
                                 <FaFeatherAlt size="15" />
                             </IconContext.Provider>
                         </button>
+
+
                     </nav>
                 </IconContext.Provider>
 
@@ -254,7 +324,7 @@ const Sidebar = () => {
                     </IconContext.Provider>
                 </button>
             </div>
-        </section>
+        </section >
     );
 };
 
