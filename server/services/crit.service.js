@@ -30,6 +30,90 @@ const fetchById = async (critId) => {
     return crit;
 };
 
+const fetchReplies = async (critId, options) => {
+    return await paginate(
+        "Crit",
+        [
+            { $match: { replyTo: critId } },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$author",
+                },
+            },
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "quoteTo",
+                    foreignField: "_id",
+                    as: "quoteTo",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$quoteTo",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "quoteTo.author",
+                    foreignField: "_id",
+                    as: "quoteTo.author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$quoteTo.author",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "replyTo",
+                    foreignField: "_id",
+                    as: "replyTo",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$replyTo",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "replyTo.author",
+                    foreignField: "_id",
+                    as: "replyTo.author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$replyTo.author",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            { $project: { document: "$$ROOT", ...userCritSelector } },
+            { $replaceRoot: { newRoot: "$document" } },
+        ],
+        options
+    );
+};
 
 const fetchEngagement = async (req, res, next) => {
     const parsedId = new ObjectId(critId);
@@ -85,6 +169,7 @@ const removeLike = async (critId, userId) => {
 
 module.exports = {
     fetchById,
+    fetchReplies,
     fetchEngagement,
     createCrit,
     createLike,

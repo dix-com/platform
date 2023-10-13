@@ -13,6 +13,8 @@ router.use(authenticate);
 
 router.get("/:critId", critController.getCrit);
 
+router.get("/:critId/replies", paginate, critController.getCritReplies);
+
 router.get("/:critId/engagement", paginate, critController.getCritEngagement);
 
 router.post("/", upload.single("media"), critController.createCrit);

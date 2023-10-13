@@ -10,6 +10,12 @@ export const critApi = baseApi.injectEndpoints({
             providesTags: (result, err, id) => [{ type: "Post", id }],
             transformResponse: (response) => response.crit,
         }),
+        getReplies: builder.query({
+            query: ({ id, page, limit }) => ({
+                url: `/crits/${id}/replies?page=${page}&limit=${limit}`,
+            }),
+            providesTags: (result) => providesList(result?.data, "Post", "CRIT_REPLIES"),
+        }),
         getQuotes: builder.query({
             query: ({ id, page, limit }) => ({
                 url: `/crits/${id}/engagement?quotes=1&page=${page}&limit=${limit}`,
@@ -45,6 +51,7 @@ export const critApi = baseApi.injectEndpoints({
 
 export const {
     useGetCritQuery,
+    useGetRepliesQuery,
     useGetHomeTimelineQuery,
     useCreateCritMutation,
     useDeleteCritMutation,

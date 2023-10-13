@@ -24,6 +24,19 @@ const getCrit = asyncHandler(async (req, res, next) => {
     });
 });
 
+const getCritReplies = asyncHandler(async (req, res, next) => {
+    const { critId } = req.params;
+
+    if (!(await Crit.exists({ _id: critId })))
+        return next(new NotFoundError("Crit with such ID doesn't exist!"));
+
+    const response = await critService.fetchReplies(
+        new ObjectId(critId),
+        req.pagination
+    );
+
+    return res.status(200).json(response);
+});
 
 const getCritEngagement = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
@@ -208,6 +221,7 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
 
 module.exports = {
     getCrit,
+    getCritReplies,
     getCritEngagement,
     createCrit,
     createRepost,
