@@ -38,6 +38,29 @@ const getCritReplies = asyncHandler(async (req, res, next) => {
     return res.status(200).json(response);
 });
 
+const getTrendingKeywords = asyncHandler(async (req, res, next) => {
+    const response = await paginate(
+        "Crit",
+        [
+            {
+                $unwind: {
+                    path: "$hashtags",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            { $match: { hashtags: { $ne: null } } },
+            { $group: { _id: "$hashtags", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+
+            { $project: { hashtag: "$_id", count: 1, _id: 0 } },
+        ],
+        req.pagination
+    );
+
+    return res.status(200).json(response);
+});
+
 const getCritEngagement = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
 
@@ -223,6 +246,7 @@ module.exports = {
     getCrit,
     getCritReplies,
     getCritEngagement,
+    getTrendingKeywords,
     createCrit,
     createRepost,
     likeCrit,

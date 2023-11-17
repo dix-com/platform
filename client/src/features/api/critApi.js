@@ -16,6 +16,18 @@ export const critApi = baseApi.injectEndpoints({
             }),
             providesTags: (result) => providesList(result?.data, "Post", "CRIT_REPLIES"),
         }),
+        getHomeTimeline: builder.query({
+            query: ({ id, page, limit }) => ({
+                url: `/users/${id}/home_timeline?page=${page}&limit=${limit}`,
+            }),
+            providesTags: (result) => providesList(result?.data, "Post", "HOME_FEED"),
+        }),
+        getTrendingKeywords: builder.query({
+            query: ({ page, limit }) => ({
+                url: `/crits/trending/keywords?page=${page}&limit=${limit}`,
+            }),
+            transformResponse: (response) => response.data,
+        }),
         getQuotes: builder.query({
             query: ({ id, page, limit }) => ({
                 url: `/crits/${id}/engagement?quotes=1&page=${page}&limit=${limit}`,
@@ -51,10 +63,10 @@ export const critApi = baseApi.injectEndpoints({
 
 export const {
     useGetCritQuery,
-    useGetRepliesQuery,
     useGetHomeTimelineQuery,
     useCreateCritMutation,
     useDeleteCritMutation,
+    useGetTrendingKeywordsQuery,
     useGetQuotesQuery,
     useGetRepostUsersQuery,
     useGetLikeUsersQuery,
