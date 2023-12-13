@@ -9,7 +9,7 @@ const critSchema = new Schema(
     {
         content: {
             type: String,
-            required: true,
+            required: [true, "Crit content is required."],
             trim: true,
             maxLength: [280, "The crit can't be longer than 280 characters."],
             validate: {
@@ -20,7 +20,7 @@ const critSchema = new Schema(
         author: {
             type: ObjectId,
             ref: "User",
-            required: true,
+            required: [true, "Author is required."],
         },
         media: [
             {

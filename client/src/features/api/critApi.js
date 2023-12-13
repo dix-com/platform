@@ -26,7 +26,11 @@ export const critApi = baseApi.injectEndpoints({
             query: ({ page, limit }) => ({
                 url: `/crits/trending/keywords?page=${page}&limit=${limit}`,
             }),
-            transformResponse: (response) => response.data,
+        }),
+        getTrendingCrits: builder.query({
+            query: ({ page, limit }) => ({
+                url: `/crits/trending/content?page=${page}&limit=${limit}`,
+            }),
         }),
         getQuotes: builder.query({
             query: ({ id, page, limit }) => ({
@@ -61,13 +65,17 @@ export const critApi = baseApi.injectEndpoints({
     }),
 });
 
+
 export const {
     useGetCritQuery,
     useGetHomeTimelineQuery,
     useCreateCritMutation,
     useDeleteCritMutation,
     useGetTrendingKeywordsQuery,
+    useLazyGetTrendingCritsQuery,
     useGetQuotesQuery,
     useGetRepostUsersQuery,
     useGetLikeUsersQuery,
+    useGetTrendingCritsQuery,
+    useGetRepliesQuery
 } = critApi;

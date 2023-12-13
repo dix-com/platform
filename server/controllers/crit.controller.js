@@ -61,6 +61,134 @@ const getTrendingKeywords = asyncHandler(async (req, res, next) => {
     return res.status(200).json(response);
 });
 
+const getTrendingCrits = asyncHandler(async (req, res, next) => {
+    const response = await paginate(
+        "Crit",
+        [
+            {
+                $unwind: {
+                    path: "$hashtags",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
+            { $match: { hashtags: { $ne: null } } },
+
+
+            {
+                $group: {
+                    _id: "$hashtags",
+                    count: { $sum: 1 },
+                    crits: { $push: "$$ROOT" }
+                }
+            },
+
+            { $sort: { count: -1 } },
+
+            {
+                $unwind: {
+                    path: "$crits",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
+            { $replaceRoot: { newRoot: "$crits" } },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$author",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "quoteTo",
+                    foreignField: "_id",
+                    as: "quoteTo",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$quoteTo",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "quoteTo.author",
+                    foreignField: "_id",
+                    as: "quoteTo.author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$quoteTo.author",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "replyTo",
+                    foreignField: "_id",
+                    as: "replyTo",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$replyTo",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "replyTo.author",
+                    foreignField: "_id",
+                    as: "replyTo.author",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$replyTo.author",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            { $sort: { "createdAt": -1 } }
+        ],
+        req.pagination
+    )
+
+    return res.status(200).json(response);
+});
+
+const getSearchCrits = asyncHandler(async (req, res, next) => {
+    const { query: searchQuery } = req.query;
+
+    if (!searchQuery)
+        return next(new NotFoundError("No query provided!"));
+
+    const searchRegex = new RegExp(searchQuery, 'i');
+    const response = await critService.fetchByQuery(searchRegex, req.pagination);
+
+    return res.status(200).json(response);
+
+});
+
 const getCritEngagement = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
 
@@ -108,7 +236,7 @@ const getCritEngagement = asyncHandler(async (req, res, next) => {
 });
 
 const createCrit = asyncHandler(async (req, res, next) => {
-    const { content, author, replyTo = null, quoteTo = null } = req.body;
+    const { content = "", author, replyTo = null, quoteTo = null } = req.body;
 
     const mentions = content.match(/(@[a-zA-Z0-9_]+)/g) || [];
     const hashtags = content.match(/#\w+/g) || [];
@@ -149,10 +277,20 @@ const createCrit = asyncHandler(async (req, res, next) => {
         };
     }
 
-    await critService.createCrit(data);
+    let crit;
+
+    try {
+        crit = await critService.createCrit(data);
+    } catch (err) {
+        let errors = Object.values(err.errors).map(el => el.message);
+        let fields = Object.values(err.errors).map(el => el.path);
+
+        console.log(errors, fields);
+    }
 
     return res.status(200).json({
-        isCritCreated: true,
+        success: true,
+        critId: crit._id
     });
 });
 
@@ -245,8 +383,10 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
 module.exports = {
     getCrit,
     getCritReplies,
-    getCritEngagement,
     getTrendingKeywords,
+    getTrendingCrits,
+    getSearchCrits,
+    getCritEngagement,
     createCrit,
     createRepost,
     likeCrit,

@@ -17,7 +17,11 @@ router.get("/:critId/replies", paginate, critController.getCritReplies);
 
 router.get("/:critId/engagement", paginate, critController.getCritEngagement);
 
+router.get("/search/recent", paginate, critController.getSearchCrits);
+
 router.get("/trending/keywords", paginate, critController.getTrendingKeywords);
+
+router.get("/trending/content", paginate, critController.getTrendingCrits);
 
 router.post("/", upload.single("media"), critController.createCrit);
 

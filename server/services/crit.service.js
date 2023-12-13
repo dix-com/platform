@@ -30,6 +30,36 @@ const fetchById = async (critId) => {
     return crit;
 };
 
+const fetchByQuery = async (query, options) => {
+    return await paginate(
+        "Crit",
+        [
+            { $unwind: '$hashtags' },
+            {
+                $match: {
+                    hashtags: { $regex: query }
+                }
+            },
+            {
+                $group: {
+                    _id: '$hashtags', count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: {
+                    count: -1
+                }
+            },
+            {
+                $project: {
+                    hashtag: '$_id', count: 1, _id: 0
+                }
+            }
+        ],
+        options
+    )
+}
+
 const fetchReplies = async (critId, options) => {
     return await paginate(
         "Crit",
@@ -150,8 +180,7 @@ const fetchEngagement = async (req, res, next) => {
 };
 
 const createCrit = async (data) => {
-    const crit = new Crit(data);
-    await crit.save();
+    return (await new Crit(data).save());
 }
 
 
@@ -169,6 +198,7 @@ const removeLike = async (critId, userId) => {
 
 module.exports = {
     fetchById,
+    fetchByQuery,
     fetchReplies,
     fetchEngagement,
     createCrit,
