@@ -6,7 +6,9 @@
 
 .crit-route .original-crit {
     overflow: hidden;
+    position: relative;
     padding-bottom: 1rem;
+    z-index: 1111;
 }
 
 .crit-route_general .crit {
@@ -18,14 +20,24 @@
     overflow: hidden !important;
 }
 
-.crit-route_general .original-crit .pfp-container::after {
+.crit-route .original-crit .pfp-container {
+    z-index: 999999999;
+    position: relative;
+}
+
+.crit-route .original-crit .pfp-container .pfp {
+    position: relative;
+    z-index: 999999999;
+}
+
+.crit-route .original-crit .pfp-container::after {
     content: "";
     position: absolute;
     top: 20px;
     width: 2px;
     height: 100vh;
-    z-index: -99999;
-    background-color: var(--black);
+    z-index: 11;
+    background-color: var(--border-2);
 }
 
 .crit-route_general .current-crit .pfp-container {

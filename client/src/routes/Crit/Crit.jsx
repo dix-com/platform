@@ -17,13 +17,17 @@ import {
     CritText,
     Spinner,
     Links,
+    MediaModal,
     PaginatedList,
     ErrorPlaceholder,
     CritPreview,
     QuotePreview,
     CritActions,
+    CritContent,
     ReplyModal,
-    CritModal
+    CritModal,
+    Trending,
+    Connect
 } from "../../components";
 
 import { formatDate, formatTime } from "../../helpers/date";
@@ -34,6 +38,7 @@ const Crit = () => {
 
     const [replyModal, setReplyModal] = useState(false);
     const [quoteModal, setQuoteModal] = useState(false);
+    const [mediaModal, setMediaModal] = useState(false);
 
     const { isAuth, user: currentUser } = useAppSelector((state) => state.auth);
 
@@ -43,7 +48,6 @@ const Crit = () => {
     const { data: crit, isLoading, isFetching, isError } = useGetCritQuery(critId);
 
     const queryResult = useInfiniteScroll(useGetRepliesQuery, { id: critId })
-
 
     const isQuote = crit?.quoteTo && !isObjEmpty(crit.quoteTo);
     const media = crit?.media?.[0];
@@ -64,6 +68,10 @@ const Crit = () => {
     const openQuoteModal = () => setQuoteModal(true);
     const closeQuoteModal = () => setQuoteModal(false);
 
+    const openMediaModal = () => setMediaModal(true);
+    const closeMediaModal = () => setMediaModal(false);
+
+
     console.log(crit, isLoading, isFetching, isError);
 
     return (
@@ -81,6 +89,14 @@ const Crit = () => {
                     isOpen={quoteModal}
                     onClose={closeQuoteModal}
                     quote={crit}
+                />
+            )}
+
+            {media && (
+                <MediaModal
+                    isOpen={mediaModal}
+                    closeMediaModal={closeMediaModal}
+                    mediaUrl={media.url}
                 />
             )}
 
@@ -129,19 +145,25 @@ const Crit = () => {
                                     </button>
                                 </div>
 
-                                <div className="crit-content">
+                                {/* <div className="crit-content">
                                     <CritText text={crit.content} />
 
                                     {media && (
                                         <div className="media-container">
                                             <img
-                                                src={media.url}
                                                 className="crit_media"
+                                                src={media.url}
                                                 alt="Crit Media"
                                             />
                                         </div>
                                     )}
-                                </div>
+                                </div> */}
+
+                                <CritContent
+                                    openMediaModal={openMediaModal}
+                                    content={crit.content}
+                                    media={media}
+                                />
 
                                 {isQuote && <QuotePreview crit={crit.quoteTo} />}
 
@@ -190,6 +212,8 @@ const Crit = () => {
             </MiddleColumn>
 
             <LeftColumn>
+                <Trending />
+                <Connect />
                 <Links />
             </LeftColumn>
         </main >

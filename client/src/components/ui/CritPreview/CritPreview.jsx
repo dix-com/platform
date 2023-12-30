@@ -19,6 +19,7 @@ import {
     CritActions,
     QuotePreview,
     LinkButton,
+    CritContent,
     MediaModal,
     ConditionalLink,
 } from "../../index";
@@ -58,6 +59,9 @@ const CritPreview = ({ crit, displayReply = true }) => {
     const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
     const isQuote = crit.quoteTo && !isObjEmpty(crit.quoteTo);
     const isRecrit = crit.recrits.includes(currentUser.id);
+
+    console.log(isReply, crit);
+
     // const isFollowerRecrit =
 
     // viewing_user, author_user
@@ -103,16 +107,13 @@ const CritPreview = ({ crit, displayReply = true }) => {
     const openReplyModal = () => setReplyModal(true);
     const closeReplyModal = () => setReplyModal(false);
 
-    const openQuoteModal = () => {
-        setQuoteModal(true);
-        setRecritFloat(false);
-    };
+    const openQuoteModal = () => { setQuoteModal(true); setRecritFloat(false); };
     const closeQuoteModal = () => setQuoteModal(false);
 
     const openMoreFloat = () => setMoreFloat(true);
     const closeMoreFloat = () => setMoreFloat(false);
 
-    console.log(crit, currentUser.id);
+    console.log(mediaModal);
 
     return (
         <IconContext.Provider value={{ className: "crit_icon" }}>
@@ -132,7 +133,7 @@ const CritPreview = ({ crit, displayReply = true }) => {
                 />
             )}
 
-            {mediaModal && (
+            {media && (
                 <MediaModal
                     isOpen={mediaModal}
                     closeMediaModal={closeMediaModal}
@@ -258,9 +259,9 @@ const CritPreview = ({ crit, displayReply = true }) => {
                         </LinkButton>
                     </CritDetails>
 
-                    {(isReply && !displayReply) && (
+                    {(isReply && displayReply) && (
                         <span className="replyingTo">
-                            Replying to{" "}
+                            <p>Replying to </p>
                             <Link
                                 to={`/${crit.replyTo.author.username}`}
                                 state={{ previousPath: pathname }}
@@ -271,22 +272,11 @@ const CritPreview = ({ crit, displayReply = true }) => {
                         </span>
                     )}
 
-                    <div className="crit-content">
-                        <CritText text={crit.content} />
-
-                        {media && (
-                            <LinkButton
-                                className="media-container"
-                                onClick={openMediaModal}
-                            >
-                                <img
-                                    src={media.url}
-                                    className="crit_media"
-                                    alt="Crit Media"
-                                />
-                            </LinkButton>
-                        )}
-                    </div>
+                    <CritContent
+                        content={crit.content}
+                        media={media}
+                        openMediaModal={openMediaModal}
+                    />
 
                     {isQuote && <QuotePreview crit={crit.quoteTo} />}
 

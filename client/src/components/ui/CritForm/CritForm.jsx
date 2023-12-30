@@ -1,7 +1,7 @@
 import "./styles.css";
 
 import { useState, useRef } from "react";
-
+import { toast } from "react-hot-toast";
 import { IconContext } from "react-icons";
 import { IoMdClose } from "react-icons/io";
 import { IoEarth } from "react-icons/io5";
@@ -44,7 +44,12 @@ const CritForm = ({
 
         const result = await createCrit(formData).unwrap();
 
-        if (!result?.error) {
+        if (result.error) {
+            toast.error("Error creating crit")
+        }
+
+        if (!result.error) {
+            toast.success("Crit created!")
             closeInput();
         }
     };

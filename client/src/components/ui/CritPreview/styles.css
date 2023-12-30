@@ -55,16 +55,6 @@
     width: 100%;
 }
 
-.crit-content .media-container {
-    margin-top: 0.75rem;
-}
-
-.crit-content .media-container .crit_media {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 1rem;
-}
-
 .crit-btn {
     position: relative;
     display: flex;
