@@ -11,3 +11,4 @@ export { default as CritDetails } from "./CritDetails";
 export { default as InputAccentRadio } from "./InputAccentRadio";
 export { default as InputThemeRadio } from "./InputThemeRadio";
 export { default as BaseWidget } from "./BaseWidget";
+export { default as Logo } from "./Logo";
