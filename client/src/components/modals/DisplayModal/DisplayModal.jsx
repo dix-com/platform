@@ -45,7 +45,8 @@ const DisplayModal = ({ isOpen, onClose }) => {
 
                 <div className="preview-container">
                     <div className="preview-author">
-                        <p className="display_name">Critter</p>
+                        <p className="display_name">X</p>
+                        <p className="username">@X · 33m</p>
                     </div>
                     <div className="preview-content">
                         <CritText
@@ -72,7 +73,7 @@ const DisplayModal = ({ isOpen, onClose }) => {
             <div className="display-modal_section">
                 <p className="display-modal_section-title">Background</p>
 
-                <div className="display-modal_section-container">
+                <div className="display-modal_section-container themes">
                     {themes.map(([themeType, label]) => (
                         <InputThemeRadio
                             type={themeType}
