@@ -1,5 +1,6 @@
 import withQuery from '../../../hoc/withQuery';
 import { useAppSelector } from '../../../app/store';
+
 import { useGetTrendingCritsQuery } from '../../../features/api/critApi';
 import { useGetRecommendedUsersQuery } from '../../../features/api/userApi';
 
@@ -44,8 +45,7 @@ const ExploreTabList = () => {
         <main>
             <MiddleColumn>
                 <ColumnHeader routerBack={true}>
-
-
+                    <h1>Connect</h1>
                 </ColumnHeader>
 
                 <PaginatedTabList

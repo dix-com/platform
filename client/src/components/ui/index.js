@@ -9,3 +9,5 @@ export { default as CritFormActions } from "./CritFormActions";
 export { default as CritInput } from "./CritInput";
 export { default as CritText } from "./CritText";
 export { default as UserPreview } from "./UserPreview";
+export { default as SearchBar } from "./SearchBar";
+export { default as CritContent } from "./CritContent";

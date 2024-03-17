@@ -5,3 +5,4 @@ export { default as EditProfile } from "./EditProfile";
 export { default as CritModal } from "./CritModal";
 export { default as VerificationModal } from "./VerificationModal";
 export { default as DisplayModal } from "./DisplayModal";
+export { default as MediaModal } from "./MediaModal";

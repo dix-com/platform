@@ -26,11 +26,19 @@ export const critApi = baseApi.injectEndpoints({
             query: ({ page, limit }) => ({
                 url: `/crits/trending/keywords?page=${page}&limit=${limit}`,
             }),
+            providesTags: (result) => providesList(result?.data, "Keyword", "TRENDING_KEYWORDS"),
         }),
         getTrendingCrits: builder.query({
             query: ({ page, limit }) => ({
                 url: `/crits/trending/content?page=${page}&limit=${limit}`,
             }),
+            providesTags: (result) => providesList(result?.data, "Post", "TRENDING_CRITS"),
+        }),
+        getSearchCrits: builder.query({
+            query: ({ searchQuery, page, limit }) => ({
+                url: `/crits/search/recent?query=${searchQuery}&page=${page}&limit=${limit}`,
+            }),
+            providesTags: (result) => providesList(result?.data, "Post", "SEARCH_CRITS"),
         }),
         getQuotes: builder.query({
             query: ({ id, page, limit }) => ({
@@ -77,5 +85,6 @@ export const {
     useGetRepostUsersQuery,
     useGetLikeUsersQuery,
     useGetTrendingCritsQuery,
-    useGetRepliesQuery
+    useGetRepliesQuery,
+    useGetSearchCritsQuery
 } = critApi;
