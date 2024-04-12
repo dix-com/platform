@@ -40,6 +40,9 @@ const connectDB = async (listener) => {
         return mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
+            // CRITICAL: MongoDB connection pool size for concurrent users
+            // Reducing this will cause "connection limit exceeded" errors!
+            maxPoolSize: 100,
         });
     } catch (err) {
         console.error(err);
