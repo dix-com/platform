@@ -3,6 +3,7 @@ import "./styles.css";
 
 import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 import {
     BaseModal,
@@ -27,7 +28,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
     const inputRef = useRef();
 
     const {
-        user: { id, profileImageURL },
+        user: { id, username, profileImageURL },
     } = useAppSelector((state) => state.auth);
 
     const [createCrit] = useCreateCritMutation();
@@ -46,6 +47,21 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
 
         if (!result?.error) {
             closeInput();
+
+            toast.success(
+                () => (
+                    <span>
+                        <span>Your Crit was sent  </span>
+                        <Link
+                            to={`/${username}/status/${result.critId}`}
+                            className="toast-view-link"
+                        >
+                            View
+                        </Link>
+                    </span >
+                ),
+                { duration: 6000 }
+            );
         }
     };
 
@@ -78,7 +94,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
                 </div>
 
                 <div className="crit-container">
-                    <CritDetails crit={replyingTo} />
+                    <CritDetails crit={replyingTo} date={false} />
 
                     <div className="crit-content">
                         <CritText text={replyingTo.content} />
@@ -114,6 +130,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
                         inputRef={inputRef}
                         mediaPreview={mediaPreview}
                         clearMedia={clearMedia}
+                        placeholder="Crit your reply"
                     />
                 </div>
             </section>
@@ -124,6 +141,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
                 setMediaPreview={setMediaPreview}
                 handleCrit={handleReply}
                 maxLength={maxLength}
+                buttonValue="Reply"
             />
         </BaseModal>
     );

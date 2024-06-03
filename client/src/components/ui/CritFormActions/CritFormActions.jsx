@@ -9,18 +9,17 @@ import { TbCalendarTime, TbMoodSmile } from "react-icons/tb";
 import { MdOutlinePoll, MdOutlineGifBox } from "react-icons/md";
 import { PiImageSquareBold } from "react-icons/pi";
 
-const CritFormActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPreview }) => {
+const CritFormActions = ({ crit, setMedia, setMediaPreview, buttonValue = "Crit", handleCrit }) => {
 
     const handleFileChange = ({ target }) => {
         const types = ["image/png", "image/jpeg", "image/jpg"];
+
         const files = target.files;
         const image = files?.[0];
 
         if (image && types.includes(image.type)) {
-            const blob = URL.createObjectURL(image);
-
             setMedia(image);
-            setMediaPreview(blob);
+            setMediaPreview(URL.createObjectURL(image)); // assign blob
         }
     };
 
@@ -41,6 +40,7 @@ const CritFormActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPrevie
                             }}
                             onChange={handleFileChange}
                         />
+
                         <div className="icon-container">
                             <PiImageSquareBold size="16" />
                         </div>
@@ -75,26 +75,6 @@ const CritFormActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPrevie
                             <TbMoodSmile size="16" />
                         </div>
                     </button>
-
-                    <button
-                        type="button"
-                        className="crit-attachments_button blue_round-btn"
-                        disabled
-                    >
-                        <div className="icon-container">
-                            <TbCalendarTime size="16" />
-                        </div>
-                    </button>
-
-                    <button
-                        type="button"
-                        className="crit-attachments_button blue_round-btn"
-                        disabled
-                    >
-                        <div className="icon-container">
-                            <HiOutlineLocationMarker size="16" />
-                        </div>
-                    </button>
                 </IconContext.Provider>
             </div>
 
@@ -103,18 +83,14 @@ const CritFormActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPrevie
                     <>
                         <div
                             className="progressbar-container"
-                            style={{
-                                width: 23,
-                                height: 23,
-                            }}
                         >
                             <CircularProgressbar
                                 value={(crit.length / 280) * 100}
                                 styles={buildStyles({
-                                    pathColor: crit.length === maxLength
+                                    pathColor: crit.length === 280
                                         ? "red"
                                         : "var(--primary-colour)",
-                                    trailColor: "var(--border-2)",
+                                    trailColor: "var(--border)",
                                     backgroundColor: "var(--primary-colour)",
                                 })}
                             />
@@ -126,14 +102,14 @@ const CritFormActions = ({ maxLength, crit, handleCrit, setMedia, setMediaPrevie
 
                 <button
                     type="button"
-                    className="blue-btn post-btn"
+                    className="accent-btn post-btn"
                     disabled={crit.length <= 0}
                     onClick={handleCrit}
                 >
-                    Crit
+                    {buttonValue}
                 </button>
             </div>
-        </div>
+        </div >
     );
 };
 

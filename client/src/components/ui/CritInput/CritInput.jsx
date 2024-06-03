@@ -6,13 +6,14 @@ import { IoMdClose } from "react-icons/io";
 import { CritText } from "../../index";
 
 const CritInput = ({
-    inputRef,
-    maxLength,
     crit,
     setCrit,
     mediaPreview,
     clearMedia,
-    setExpanded,
+    maxLength,
+    inputRef,
+    onFocus,
+    placeholder = "What's happening?",
 }) => {
     const textInputRef = useRef();
     const textRef = useRef();
@@ -29,6 +30,10 @@ const CritInput = ({
         textRef.current.style.height = `${textRef.current.scrollHeight}px`;
     }, [crit]);
 
+    const handleFocus = (e) => {
+        onFocus && onFocus(e);
+    }
+
     return (
         <>
             <div
@@ -43,12 +48,12 @@ const CritInput = ({
                 <textarea
                     type="text"
                     id="crit"
-                    placeholder="What's happening?!"
+                    placeholder={placeholder}
                     ref={inputRef}
                     maxLength={maxLength}
                     value={crit}
                     onChange={({ target }) => setCrit(target.value)}
-                    onFocus={() => setExpanded && setExpanded(true)}
+                    onFocus={handleFocus}
                 />
             </div>
 

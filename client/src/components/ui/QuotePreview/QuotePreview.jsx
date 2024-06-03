@@ -1,13 +1,15 @@
 import "./styles.css";
 
 import { Link, useLocation } from "react-router-dom";
-import { CritDetails } from "../../index";
 import { isObjEmpty } from "../../../utils/object";
+import { getTimeDifference } from "../../../helpers/date";
 
 const QuotePreview = ({ crit }) => {
     const { pathname } = useLocation();
 
+
     const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
+    const formattedDate = getTimeDifference(crit.createdAt);
     const media = crit.media?.[0];
 
     return (
@@ -25,7 +27,19 @@ const QuotePreview = ({ crit }) => {
                     />
                 </div>
 
-                <CritDetails crit={crit} />
+                <Link
+                    className="display_name"
+                    to={`/${crit.author.username}`}
+                >
+                    {crit.author.displayName}
+                </Link>
+
+                <p className="username">@{crit.author.username}</p>
+
+                <p className="date">
+                    <span className="separator">·</span>
+                    {formattedDate}
+                </p>
             </div>
 
             <div className="crit-content">

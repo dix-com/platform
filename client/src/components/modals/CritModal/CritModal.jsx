@@ -2,7 +2,8 @@ import "./styles.css";
 import "../../ui/CritForm/styles.css";
 
 import { useState, useRef } from "react";
-
+import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { IconContext } from "react-icons";
 import { IoEarth } from "react-icons/io5";
 
@@ -26,7 +27,7 @@ const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
     const inputRef = useRef();
 
     const {
-        user: { id, profileImageURL },
+        user: { id, profileImageURL, username },
     } = useAppSelector((state) => state.auth);
 
     const [createCrit] = useCreateCritMutation();
@@ -42,6 +43,21 @@ const CritModal = ({ maxLength = 280, quote = null, isOpen, onClose }) => {
         const result = await createCrit(formData).unwrap();
 
         if (!result.error) {
+            toast.success(
+                () => (
+                    <span>
+                        <span>Your Crit was sent  </span>
+                        <Link
+                            to={`/${username}/status/${result.critId}`}
+                            className="toast-view-link"
+                        >
+                            View
+                        </Link>
+                    </span >
+                ),
+                { duration: 6000 }
+            );
+
             closeInput();
         }
     };
