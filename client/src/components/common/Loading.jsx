@@ -1,4 +1,4 @@
-import logo from "../../assets/logo.svg";
+import logo from "../../assets/critter.png";
 import classNames from "classnames";
 import { useTheme } from "../../contexts/ThemeProvider";
 
