@@ -14,7 +14,7 @@ const Loading = () => {
                     light: theme === "light"
                 })}
                 style={{ width: "100px" }}
-                alt="Critter Icon"
+                alt="X Icon"
             />
         </div>
     );
