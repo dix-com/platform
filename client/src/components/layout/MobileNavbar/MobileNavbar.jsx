@@ -1,5 +1,6 @@
 import "./styles.css";
 
+import classNames from "classnames";
 import { NavLink, useLocation } from "react-router-dom";
 import { IconContext } from "react-icons";
 import {
@@ -12,32 +13,24 @@ import {
     BiSolidEnvelope
 } from "react-icons/bi";
 import { FaFeatherAlt } from "react-icons/fa";
-import { CritModal } from "../../index";
-import useModal from "../../../hooks/useModal";
+
+import useScrollDirection from "../../../hooks/useScrollDirection";
+
+import { useAppDispatch } from "../../../app/store";
+import { modalActions } from "../../../features/slices/modalSlice";
+
 
 const MobileNavbar = () => {
     const { pathname } = useLocation();
+    const dispatch = useAppDispatch();
+    const scrollDirection = useScrollDirection();
 
-    const {
-        isOpen: critModal,
-        open: openCritModal,
-        close: closeCritModal
-    } = useModal();
-
+    const navbarClasses = classNames("mobile-navbar", {
+        scroll: scrollDirection === "down",
+    });
 
     return (
-        <div className="mobile-navbar">
-            {critModal && (
-                <>
-                    <div className="modal-wrapper" style={{ willChange: "opacity" }}>
-                    </div>
-                    <CritModal
-                        isOpen={critModal}
-                        onClose={closeCritModal}
-                    />
-                </>
-            )}
-
+        <div className={navbarClasses}>
             <NavLink
                 to={`/home`}
                 className="navbar-link"
@@ -99,7 +92,9 @@ const MobileNavbar = () => {
             <button
                 type="button"
                 className="accent-btn navbar-btn"
-                onClick={openCritModal}
+                onClick={() => dispatch(
+                    modalActions.openModal({ name: "CritModal" })
+                )}
             >
                 <IconContext.Provider
                     value={{ className: "navbar-btn_icon" }}
