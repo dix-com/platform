@@ -7,12 +7,12 @@ import { IconContext } from "react-icons";
 import { IoMdClose } from "react-icons/io";
 import { IoEarth } from "react-icons/io5";
 
-import useOutsideClick from "../../../hooks/useOutsideClick";
-
-import { CritInput, CritFormActions } from "../../index";
-
 import { useAppSelector } from "../../../app/store";
 import { useCreateCritMutation } from "../../../features/api/critApi";
+import useOutsideClick from "../../../hooks/useOutsideClick";
+
+import { CritInput, CritFormActions, PfpContainer } from "../../index";
+
 
 const CritForm = ({
     replyTo,
@@ -44,7 +44,6 @@ const CritForm = ({
         formData.append("media", media);
 
         if (replyTo) formData.append("replyTo", replyTo);
-
 
         const result = await createCrit(formData).unwrap();
 
@@ -89,15 +88,7 @@ const CritForm = ({
             className={`crit-form ${forceExpand && "force-expand"}`}
             ref={ref}
         >
-            {showPfp && (
-                <div className="pfp-container">
-                    <img
-                        src={profileImageURL}
-                        className="pfp"
-                        alt="User PFP"
-                    />
-                </div>
-            )}
+            {showPfp && <PfpContainer src={profileImageURL} />}
 
             <div className="crit-input">
                 <div className={`crit-input_container ${expanded && "expanded"}`}>
@@ -123,7 +114,7 @@ const CritForm = ({
                     {mediaPreview && (
                         <div className="media-preview">
                             <button
-                                className="media-preview_close dark_round-btn"
+                                className="dark_round-btn media-preview_close"
                                 onClick={clearMedia}
                             >
                                 <div className="icon-container">
@@ -133,10 +124,8 @@ const CritForm = ({
                                     />
                                 </div>
                             </button>
-                            <img
-                                src={mediaPreview}
-                                alt="Media Preview"
-                            />
+
+                            <img src={mediaPreview} alt="Media Preview" />
                         </div>
                     )}
 

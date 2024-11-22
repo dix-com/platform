@@ -13,6 +13,7 @@ import {
     CritFormActions,
     CritDetails,
     QuotePreview,
+    PfpContainer
 } from "../../index";
 
 import { useAppSelector } from "../../../app/store";
@@ -20,7 +21,7 @@ import { useCreateCritMutation } from "../../../features/api/critApi";
 
 import { isObjEmpty } from "../../../utils/object";
 
-const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
+const ReplyModal = ({ replyingTo, isOpen, closeModal, maxLength = 280 }) => {
     const [crit, setCrit] = useState("");
     const [media, setMedia] = useState(null);
     const [mediaPreview, setMediaPreview] = useState(null);
@@ -47,8 +48,7 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
 
         if (!result?.error) {
             closeInput();
-
-            toast.success(
+            toast(
                 () => (
                     <span>
                         <span>Your Crit was sent  </span>
@@ -79,22 +79,16 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
     return (
         <BaseModal
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={closeModal}
             className="reply-modal"
         >
-            <ColumnHeader close={onClose} />
+            <ColumnHeader closeModal={true} />
 
             <section className="recipient-crit">
-                <div className="pfp-container">
-                    <img
-                        src={replyingTo.author.profileImageURL}
-                        className="pfp"
-                        alt="User PFP"
-                    />
-                </div>
+                <PfpContainer src={replyingTo.author.profileImageURL} />
 
                 <div className="crit-container">
-                    <CritDetails crit={replyingTo} date={false} />
+                    <CritDetails crit={replyingTo} />
 
                     <div className="crit-content">
                         <CritText text={replyingTo.content} />
@@ -115,13 +109,9 @@ const ReplyModal = ({ replyingTo, isOpen, onClose, maxLength = 280 }) => {
             </section>
 
             <section className="crit-input">
-                <div className="pfp-container">
-                    <img
-                        src={profileImageURL}
-                        className="pfp"
-                        alt="User PFP"
-                    />
-                </div>
+                <PfpContainer src={profileImageURL} />
+
+
                 <div className="input-container">
                     <CritInput
                         crit={crit}

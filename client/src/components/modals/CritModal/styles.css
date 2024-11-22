@@ -44,14 +44,15 @@
 
 .crit-modal .pfp-container {
     align-items: flex-start;
-    padding-top: 0.3rem;
+    margin-top: 0.3rem;
     margin-right: 0.75rem !important;
+    min-width: 40px;
 }
 
-.crit-modal .pfp-container .pfp {
+/* .crit-modal .pfp-container .pfp {
     width: 40px;
     height: 40px;
-}
+} */
 
 .crit-modal .crit-input-wrapper .crit-text {
     display: block;
@@ -59,7 +60,7 @@
 
 .crit-modal .crit-input-wrapper {
     width: 100%;
-    margin: 0.75rem 0 !important;
+    margin: 1rem 0 !important;
 }
 
 .crit-modal .input-wrap {
