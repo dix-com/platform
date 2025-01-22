@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const User = require("./User.model");
-const Bookmark = require("./Bookmark.model");
 
 const Schema = mongoose.Schema;
 const ObjectId = Schema.Types.ObjectId;
@@ -34,6 +32,14 @@ const critSchema = new Schema(
                     enum: ["image", "gif"],
                     message: "Invalid media type.",
                 },
+                width: {
+                    type: String,
+                    required: true
+                },
+                height: {
+                    type: String,
+                    required: true
+                }
             },
         ],
         mentions: {
@@ -76,12 +82,13 @@ const critSchema = new Schema(
 
 // critSchema.index({author: 1, hashtags: 1});
 
+
 critSchema.methods.updateRepliesCount = async function () {
     this.repliesCount = await mongoose.model("Crit").countDocuments({
         replyTo: this._id,
     });
 
-    return this.save();
+    this.save();
 };
 
 critSchema.methods.addRecrit = function (userId) {
@@ -112,9 +119,13 @@ critSchema.methods.deleteRecrit = function (userId) {
  *
  */
 
-critSchema.pre('deleteOne', async function (next) {
+
+critSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
     const Crit = this.model('Crit');
-    const critId = this.getQuery()['_id'];
+    const User = this.model('User');
+    const Bookmark = this.model('Bookmark');
+
+    const critId = this._id;
 
     await Crit.deleteMany({
         $or: [

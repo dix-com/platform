@@ -1,4 +1,6 @@
 const { ObjectId } = require("mongoose").Types;
+const sizeOf = require("image-size");
+
 const User = require("../models/User.model");
 const Crit = require("../models/Crit.model");
 const asyncHandler = require("../middlewares/asyncHandler");
@@ -7,9 +9,10 @@ const critService = require("../services/crit.service");
 const paginate = require("../helpers/paginatePlugin");
 const { engagementSelector } = require("../helpers/selectors");
 
+const pick = require("../utils/pick");
 const { NotFoundError, ForbiddenError } = require("../utils/errors");
 const { isObjEmpty } = require("../utils/object");
-const pick = require("../utils/pick");
+
 
 const getCrit = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
@@ -258,22 +261,17 @@ const createCrit = asyncHandler(async (req, res, next) => {
         return next(new NotFoundError("Crit being quoted is not found!"));
 
     if (replyTo && !(await Crit.exists({ _id: replyTo })))
-        return next(new NotFoundError("Crit being quoted is not found!"));
-
-    if (replyTo) {
-        const originalCrit = await Crit.findById(replyTo);
-
-        if (!originalCrit)
-            return next(new NotFoundError("Crit being replied to is not found!"));
-
-        await originalCrit.updateRepliesCount();
-    }
+        return next(new NotFoundError("Crit being replied to is not found!"));
 
     // Attach incoming files
     if (req.file) {
+        const dimensions = sizeOf(req.file.path)
+
         data.media = {
             url: `${process.env.API_URL}/${req.file.path}`,
             mediaType: req.file.mimetype.split("/")[0],
+            height: dimensions.height.toString(),
+            width: dimensions.width.toString()
         };
     }
 
@@ -286,6 +284,10 @@ const createCrit = asyncHandler(async (req, res, next) => {
         let fields = Object.values(err.errors).map(el => el.path);
     }
 
+    if (replyTo)
+        await Crit.findByIdAndUpdate(replyTo, { $inc: { repliesCount: 1 } });
+
+
     return res.status(200).json({
         success: true,
         critId: crit._id
@@ -295,7 +297,7 @@ const createCrit = asyncHandler(async (req, res, next) => {
 const deleteCrit = asyncHandler(async (req, res, next) => {
     const { critId } = req.params;
 
-    const crit = await Crit.findById(critId);
+    const crit = await Crit.findOne({ _id: critId });
     const critAuthorId = crit.author._id.toString();
     const authUserId = req.user._id.toString();
 
@@ -306,6 +308,7 @@ const deleteCrit = asyncHandler(async (req, res, next) => {
         return next(new ForbiddenError("You are not authorized to delete this crit!"));
 
     await crit.deleteOne();
+    // await Crit.findByIdAndRemove(critId);
 
     return res.status(200).json({
         isCritDeleted: true,
@@ -351,8 +354,8 @@ const deleteRepost = asyncHandler(async (req, res, next) => {
 });
 
 const likeCrit = asyncHandler(async (req, res, next) => {
-    const userId = req.user._id;
     const critId = req.params.critId;
+    const userId = req.body.userId;
 
     const crit = await critService.createLike(critId, userId);
 
@@ -361,12 +364,13 @@ const likeCrit = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json({
         isLiked: true,
+        userId
     });
 });
 
 const unlikeCrit = asyncHandler(async (req, res, next) => {
-    const userId = req.user._id;
     const critId = req.params.critId;
+    const userId = req.body.userId;
 
     const crit = await critService.removeLike(critId, userId);
 
@@ -375,8 +379,10 @@ const unlikeCrit = asyncHandler(async (req, res, next) => {
 
     return res.status(200).json({
         isLiked: false,
+        userId
     });
 });
+
 
 module.exports = {
     getCrit,

@@ -8,7 +8,7 @@ const {
 } = require("../helpers/selectors");
 
 const fetchById = async (critId) => {
-    const crit = await Crit.findById(critId).populate({
+    return (await Crit.findById(critId).populate({
         path: "author",
         select: userInfoSelector,
     }).populate({
@@ -25,13 +25,11 @@ const fetchById = async (critId) => {
             path: "author",
             select: userInfoSelector,
         }
-    });
-
-    return crit;
+    }));
 };
 
 const fetchByQuery = async (query, options) => {
-    return await paginate(
+    return (await paginate(
         "Crit",
         [
             { $unwind: '$hashtags' },
@@ -81,11 +79,11 @@ const fetchByQuery = async (query, options) => {
             }
         ],
         options
-    )
+    ));
 }
 
 const fetchReplies = async (critId, options) => {
-    return await paginate(
+    return (await paginate(
         "Crit",
         [
             { $match: { replyTo: critId } },
@@ -166,7 +164,7 @@ const fetchReplies = async (critId, options) => {
             { $replaceRoot: { newRoot: "$document" } },
         ],
         options
-    );
+    ));
 };
 
 const fetchEngagement = async (req, res, next) => {
@@ -206,7 +204,6 @@ const fetchEngagement = async (req, res, next) => {
 const createCrit = async (data) => {
     return (await new Crit(data).save());
 }
-
 
 const createLike = async (critId, userId) => {
     return await Crit.findByIdAndUpdate(critId, {
