@@ -1,7 +1,6 @@
-export { default as FloatOptions } from "./FloatOptions";
 export { default as PaginatedList } from "./PaginatedList";
 export { default as QuotePreview } from "./QuotePreview";
-export { default as PaginatedTabList } from "./PaginatedTabList";
+export { default as TabList } from "./TabList";
 export { default as CritPreview } from "./CritPreview";
 export { default as CritActions } from "./CritActions";
 export { default as CritForm } from "./CritForm";
@@ -10,4 +9,5 @@ export { default as CritInput } from "./CritInput";
 export { default as CritText } from "./CritText";
 export { default as UserPreview } from "./UserPreview";
 export { default as SearchBar } from "./SearchBar";
+export { default as TabPanel } from "./TabPanel";
 export { default as CritContent } from "./CritContent";
