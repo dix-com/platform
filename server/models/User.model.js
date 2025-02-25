@@ -69,7 +69,11 @@ const userSchema = new Schema(
         },
         profileImageURL: String,
         bannerURL: String,
-        displayName: String,
+        displayName: {
+            type: String,
+            minlength: 1,
+            required: true,
+        },
         bio: {
             type: String,
             maxLength: 160,
@@ -107,11 +111,18 @@ const userSchema = new Schema(
             ref: "Crit",
             default: [],
         },
+        pin: {
+            type: ObjectId,
+            ref: "Crit",
+            default: null
+        },
     },
     { timestamps: true }
 );
 
-// userSchema.index({ username: 1, email: 1 });
+userSchema.index({ username: 1, email: 1 }, { unique: true });
+
+userSchema.index({ username: 1, email: "" }, { unique: true });
 
 
 /**

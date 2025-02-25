@@ -1,5 +1,4 @@
 const User = require("../models/User.model");
-const Crit = require("../models/Crit.model");
 const paginate = require("../helpers/paginatePlugin");
 
 const {
@@ -8,16 +7,183 @@ const {
     quoteToSelector,
     followSelector,
     postDetailSelector,
+    userInfoSelector
 } = require("../helpers/selectors");
 
 
-
-
 const findByUsername = async (username) => {
-    const user = await User.findOne({ username }).populate("bookmarks");
+    const userAggregation = await User.aggregate([
+        {
+            $match: { username: username }
+        }, // Match the user by username
 
-    const bookmarks = user.bookmarks.map((bookmark) => bookmark.crit);
-    user.bookmarks = bookmarks;
+        {
+            $lookup: {
+                from: "crits",
+                let: { id: "$_id" }, // Assigns the _id of the current document to a variable for use in the sub-pipeline
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $or: [
+                                    { $in: ["$$id", "$recrits"] },
+                                    {
+                                        $and: [
+                                            { $eq: ["$$id", "$author"] },
+                                            { $eq: ["$replyTo", null] }
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    { $count: "count" }
+                ],
+                as: "critCount" // Places the count in an array named replies_count in the original document
+            }
+        },
+
+        {
+            $lookup: {
+                from: "crits",
+                let: { id: "$_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $and: [
+                                    {
+                                        $eq: ["$$id", "$author"]
+                                    },
+                                    {
+                                        $ne: ["$media", []]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    { $count: "count" }
+                ],
+                as: "mediaCount"
+            }
+        },
+
+        {
+            $lookup: {
+                from: "crits",
+                let: { id: "$_id" },
+                pipeline: [
+                    {
+                        $match: {
+                            $expr: {
+                                $in: ["$$id", "$likes"]
+                            }
+                        }
+                    },
+                    { $count: "count" }
+                ],
+                as: "likeCount"
+            }
+        },
+
+        {
+            $lookup: {
+                from: "bookmarks", // Assuming 'bookmarks' is a collection name; adjust as necessary
+                localField: "_id", // Adjust based on your schema
+                foreignField: "user", // Adjust based on your schema
+                as: "bookmarks"
+            }
+        },
+
+        {
+            $lookup: {
+                from: "crits",
+                localField: "pin",
+                foreignField: "_id",
+                as: "pin"
+            }
+        },
+
+        {
+            $unwind: {
+                path: "$pin",
+                preserveNullAndEmptyArrays: true,
+            }
+        },
+
+        {
+            $lookup: {
+                from: "users",
+                localField: "pin.author",
+                foreignField: "_id",
+                as: "pin.author"
+            }
+        },
+
+        {
+            $unwind: {
+                path: "$pin.author",
+                preserveNullAndEmptyArrays: true,
+            }
+        },
+
+        {
+            $lookup: {
+                from: "crits",
+                localField: "pin.replyTo",
+                foreignField: "_id",
+                as: "replyTo"
+            }
+        },
+
+        {
+            $unwind: {
+                path: "$replyTo",
+                preserveNullAndEmptyArrays: true,
+            }
+        },
+
+        {
+            $lookup: {
+                from: "crits",
+                localField: "pin.quoteTo",
+                foreignField: "_id",
+                as: "quoteTo"
+            }
+        },
+
+        {
+            $unwind: {
+                path: "$quoteTo",
+                preserveNullAndEmptyArrays: true,
+            }
+        },
+
+        {
+            $addFields: {
+                bookmarks: {
+                    $map: {
+                        input: "$bookmarks",
+                        as: "bookmark",
+                        in: "$$bookmark.crit" // Extract the crit ObjectId from each bookmark
+                    }
+                },
+                pin: {
+                    $cond: {
+                        if: { $eq: ["$pin", {}] },
+                        then: null,
+                        else: "$pin"
+                    }
+                },
+                critCount: { $arrayElemAt: ["$critCount.count", 0] },
+                mediaCount: { $arrayElemAt: ["$mediaCount.count", 0] },
+                likeCount: { $arrayElemAt: ["$likeCount.count", 0] }
+            }
+        },
+    ]);
+
+    // Assuming the aggregation returns an array, you may need to select the first element for a single user object
+    const user = userAggregation[0] ? userAggregation[0] : null;
 
     return user;
 };
@@ -27,7 +193,8 @@ const findByIdentifier = async (identifier, options = {}) => {
         $or: [{ username: identifier }, { email: identifier }],
     });
 
-    if (options.select) user = user.select(options.select);
+    if (options.select)
+        user = user.select(options.select);
 
     return await user.exec();
 };
@@ -60,7 +227,7 @@ const fetchRecommendedUsers = async (userId, options) => {
         [
 
             {
-                $match: { _id: { $ne: userId } }
+                $match: { $and: [{ _id: { $ne: userId } }, { verified: true }] }
             },
             {
                 $lookup: {
@@ -86,52 +253,64 @@ const fetchRecommendedUsers = async (userId, options) => {
 
 const fetchHomeFeed = async (userId, options) => {
     return await paginate(
-        "User",
+        "Crit",
         [
             {
                 $match: {
-                    _id: userId,
-                },
-            },
-            {
-                $lookup: {
-                    from: "crits",
-                    localField: "following",
-                    foreignField: "author",
-                    as: "followingCrits",
-                },
-            },
-            {
-                $unwind: {
-                    path: "$followingCrits",
-                    preserveNullAndEmptyArrays: true,
-                },
+                    replyTo: { $eq: null }
+                }
             },
             {
                 $lookup: {
                     from: "users",
-                    localField: "followingCrits.author",
+                    localField: "author",
                     foreignField: "_id",
-                    as: "followingCrits.author",
-                },
+                    as: "author"
+                }
             },
+
             {
                 $unwind: {
-                    path: "$followingCrits.author",
-                    // preserveNullAndEmptyArrays: true,
-                },
+                    path: "$author"
+                }
             },
+
+
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "replyTo",
+                    foreignField: "_id",
+                    as: "replyTo"
+                }
+            },
+
+            {
+                $unwind: {
+                    path: "$replyTo",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
+            {
+                $lookup: {
+                    from: "crits",
+                    localField: "quoteTo",
+                    foreignField: "_id",
+                    as: "quoteTo"
+                }
+            },
+
+            {
+                $unwind: {
+                    path: "$quoteTo",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+
             {
                 $project: {
-                    document: "$$ROOT.followingCrits",
-                },
-            },
-            {
-                $replaceRoot: { newRoot: "$document" },
-            },
-            {
-                $project: {
-                    replies: 1,
+                    // replies: 1,
                     ...postAuthorSelector,
                     ...postDetailSelector,
                 },
