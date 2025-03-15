@@ -44,7 +44,7 @@ services:
         ports:
             - 127.0.0.1:27017:27017
         healthcheck:
-            test: echo 'db.runCommand("ping").ok' |  mongosh mongodb://mongodb:27017/critter --quiet 1
+            test: echo 'db.runCommand("ping").ok' |  mongosh mongodb://mongodb:27017/dix --quiet 1
             interval: 10s
             timeout: 10s
             retries: 5
