@@ -1,11 +1,11 @@
 import "./styles.css";
 
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { IoEllipsisHorizontal } from "react-icons/io5";
+import { useEffect, useState, useRef } from "react";
+import { createSelector } from "@reduxjs/toolkit";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
-import useInfiniteScroll from "../../hooks/useInfiniteScroll";
-import { useAppSelector } from "../../app/store";
+import { useAppSelector, useAppDispatch } from "../../app/store";
+
 import { useGetUserInfoQuery } from "../../features/api/userApi";
 import { useGetCritQuery, useGetRepliesQuery } from "../../features/api/critApi";
 
@@ -14,40 +14,54 @@ import {
     MiddleColumn,
     ColumnHeader,
     CritForm,
-    CritText,
+    CritDetails,
     Spinner,
     Links,
-    MediaModal,
     PaginatedList,
     ErrorPlaceholder,
     CritPreview,
     QuotePreview,
     CritActions,
     CritContent,
-    ReplyModal,
-    CritModal,
+    SearchBar,
     Trending,
-    Connect
+    Connect,
+    PfpContainer
 } from "../../components";
 
 import { formatDate, formatTime } from "../../helpers/date";
 import { isObjEmpty } from "../../utils/object";
 
+
 const Crit = () => {
+    const scrollRef = useRef(null);
     const { critId } = useParams();
+    const navigate = useNavigate();
 
-    const [replyModal, setReplyModal] = useState(false);
-    const [quoteModal, setQuoteModal] = useState(false);
-    const [mediaModal, setMediaModal] = useState(false);
-
-    const { isAuth, user: currentUser } = useAppSelector((state) => state.auth);
-
+    const { user: currentUser } = useAppSelector((state) => state.auth);
     const { data: currentUserInfo } = useGetUserInfoQuery(currentUser?.username, {
         skip: !currentUser?.username,
     });
-    const { data: crit, isLoading, isFetching, isError } = useGetCritQuery(critId);
 
-    const queryResult = useInfiniteScroll(useGetRepliesQuery, { id: critId })
+    const {
+        data: crit,
+        isLoading,
+        isFetching,
+        isError
+    } = useGetCritQuery(critId);
+
+    const {
+        data: originalCrit,
+        isLoading: isOriginalLoading,
+        isFetching: isOriginalFetching,
+        isError: isOriginalError
+    } = useGetCritQuery(crit?.replyTo?._id);
+
+    // useEffect(() => {
+    //     scrollRef.current && scrollRef.current.scrollIntoView({
+    //         behavior: 'smooth',
+    //     });
+    // }, [scrollRef]);
 
     const isQuote = crit?.quoteTo && !isObjEmpty(crit.quoteTo);
     const media = crit?.media?.[0];
@@ -62,44 +76,9 @@ const Crit = () => {
         year: "numeric"
     });
 
-    const openReplyModal = () => setReplyModal(true);
-    const closeReplyModal = () => setReplyModal(false);
-
-    const openQuoteModal = () => setQuoteModal(true);
-    const closeQuoteModal = () => setQuoteModal(false);
-
-    const openMediaModal = () => setMediaModal(true);
-    const closeMediaModal = () => setMediaModal(false);
-
-
-    console.log(crit, isLoading, isFetching, isError);
 
     return (
         <main className="crit-route">
-            {replyModal && (
-                <ReplyModal
-                    isOpen={replyModal}
-                    onClose={closeReplyModal}
-                    replyingTo={crit}
-                />
-            )}
-
-            {quoteModal && (
-                <CritModal
-                    isOpen={quoteModal}
-                    onClose={closeQuoteModal}
-                    quote={crit}
-                />
-            )}
-
-            {media && (
-                <MediaModal
-                    isOpen={mediaModal}
-                    closeMediaModal={closeMediaModal}
-                    mediaUrl={media.url}
-                />
-            )}
-
             <MiddleColumn className="crit-route_general">
                 <ColumnHeader
                     className="crit-route-header"
@@ -108,110 +87,105 @@ const Crit = () => {
                     <h1>Post</h1>
                 </ColumnHeader>
 
-                {isLoading && <Spinner />}
-                {isError && <ErrorPlaceholder />}
+                <div className="route_wrapper">
+                    {(!isLoading && !isError) && (
+                        <>
+                            <section className="relevant-crits">
+                                {crit?.replyTo && (
+                                    <div className="relevant-crit original-crit">
+                                        {isOriginalLoading && <Spinner />}
+                                        {isOriginalError && <ErrorPlaceholder />}
 
-                {(!isLoading && !isError) && (
-                    <>
-                        <section className="relevant-crits">
-                            {crit.replyTo && (
-                                <div className="original-crit">
-                                    <CritPreview crit={crit.replyTo} />
-                                </div>
-                            )}
+                                        {(originalCrit && !isOriginalLoading && !isOriginalError) && (
+                                            <CritPreview
+                                                crit={originalCrit}
+                                                onDelete={() => navigate("/home")}
+                                            />
+                                        )}
+                                    </div>
+                                )}
 
-                            <div className="current-crit">
-                                <div className="crit-details">
-                                    <div className="user-info">
-                                        <div className="pfp-container">
-                                            <div className="icon-container">
-                                                <img
-                                                    src={crit?.author.profileImageURL}
-                                                    className="pfp"
-                                                    alt="Profile Pfp"
+
+                                <div
+                                    className="relevant-crit current-crit"
+                                    ref={scrollRef}
+                                >
+                                    {isLoading && <Spinner />}
+                                    {isError && <ErrorPlaceholder />}
+
+                                    {(crit && !isLoading && !isError) && (
+                                        <>
+                                            <div className="crit-details_wrapper">
+                                                <PfpContainer src={crit?.author.profileImageURL} />
+
+                                                <CritDetails
+                                                    crit={crit}
+                                                    date={false}
+                                                    onDelete={() => navigate("/home")}
                                                 />
                                             </div>
-                                        </div>
-                                        <div className="wrapper">
-                                            <h2 className="displayName">{crit.author.displayName}</h2>
-                                            <p className="username">@{crit.author.username}</p>
-                                        </div>
-                                    </div>
 
-                                    <button className="blue_round-btn">
-                                        <div className="icon-container">
-                                            <IoEllipsisHorizontal className="icon" />
-                                        </div>
-                                    </button>
-                                </div>
-
-                                {/* <div className="crit-content">
-                                    <CritText text={crit.content} />
-
-                                    {media && (
-                                        <div className="media-container">
-                                            <img
-                                                className="crit_media"
-                                                src={media.url}
-                                                alt="Crit Media"
+                                            <CritContent
+                                                content={crit.content}
+                                                media={media}
                                             />
-                                        </div>
+
+                                            {isQuote && <QuotePreview crit={crit.quoteTo} />}
+
+                                            <div className="crit-stats">
+                                                <Link className="link">
+                                                    <span className="stat date">
+                                                        {timeCreatedAt}
+                                                    </span>
+
+                                                    <span className="separator">
+                                                        ·
+                                                    </span>
+
+                                                    <span className="stat date">
+                                                        {dateCreatedAt}
+                                                    </span>
+                                                </Link>
+
+                                                <span className="separator">·</span>
+
+                                                <span className="views">
+                                                    {0} <span className="stat">Views</span>
+                                                </span>
+                                            </div>
+                                        </>
                                     )}
-                                </div> */}
-
-                                <CritContent
-                                    openMediaModal={openMediaModal}
-                                    content={crit.content}
-                                    media={media}
-                                />
-
-                                {isQuote && <QuotePreview crit={crit.quoteTo} />}
 
 
-                                <div className="crit-stats">
-                                    <Link className="link">
-                                        <span className="stat date">
-                                            {timeCreatedAt}
-                                        </span>
-                                        <span className="separator">·</span>
-                                        <span className="stat date">
-                                            {dateCreatedAt}
-                                        </span>
-                                    </Link>
-
-                                    <span className="separator">·</span>
-
-                                    <span className="views">
-                                        {1} <span className="stat">Views</span>
-                                    </span>
                                 </div>
-                            </div>
-                        </section>
+                            </section>
 
-                        <CritActions
-                            crit={crit}
-                            currentUser={currentUserInfo}
-                            openReplyModal={openReplyModal}
-                            openQuoteModal={openQuoteModal}
-                        />
+                            <CritActions
+                                crit={crit}
+                                currentUser={currentUserInfo}
+                            />
 
-                        <CritForm
-                            replyTo={crit._id}
-                            forceExpand={true}
-                            maxLength={280}
-                            button="Reply"
-                            placeholder="Post your reply"
-                        />
+                            <CritForm
+                                replyTo={crit._id}
+                                forceExpand={true}
+                                maxLength={280}
+                                placeholder="Post your reply"
+                                buttonValue="Reply"
+                            />
 
-                        <PaginatedList
-                            queryResult={queryResult}
-                            component={CritPreview}
-                        />
-                    </>
-                )}
+                            <PaginatedList
+                                queryHook={useGetRepliesQuery}
+                                args={{ id: critId }}
+                                renderItem={(data) => <CritPreview crit={data} />}
+                                renderPlaceholder={() => { }}
+                            />
+                        </>
+                    )}
+                </div>
             </MiddleColumn>
 
             <LeftColumn>
+                <SearchBar />
                 <Trending />
                 <Connect />
                 <Links />
