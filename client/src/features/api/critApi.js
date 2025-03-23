@@ -70,6 +70,28 @@ export const critApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: (result, error, critId) => [{ type: "Post", id: critId }],
         }),
+        likeCrit: builder.mutation({
+            query: ({ id, userId }) => ({
+                url: `/crits/${id}/like`,
+                method: "POST",
+                body: { userId }
+            }),
+            invalidatesTags: (result, error, { id, userId }) => [
+                { type: "Post", id },
+                { type: "User", userId }
+            ],
+        }),
+        unlikeCrit: builder.mutation({
+            query: ({ id, userId }) => ({
+                url: `/crits/${id}/like`,
+                method: "DELETE",
+                body: { userId }
+            }),
+            invalidatesTags: (result, error, { id, userId }) => [
+                { type: "Post", id },
+                { type: "User", userId }
+            ],
+        }),
     }),
 });
 
@@ -86,5 +108,7 @@ export const {
     useGetLikeUsersQuery,
     useGetTrendingCritsQuery,
     useGetRepliesQuery,
-    useGetSearchCritsQuery
+    useGetSearchCritsQuery,
+    useLikeCritMutation,
+    useUnlikeCritMutation,
 } = critApi;
