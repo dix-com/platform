@@ -18,11 +18,6 @@ const loginSlice = createSlice({
             state.form = initialState.form;
         },
     },
-    // extraReducers: (builder) => {
-    //     // builder.addCase(checkAuth.pending, (state, action) => {
-    //     //     state["auth/checkAuth"] = null;
-    //     // });
-    // },
 });
 
 export const loginActions = loginSlice.actions;

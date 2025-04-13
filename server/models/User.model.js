@@ -82,14 +82,6 @@ const userSchema = new Schema(
             type: String,
             default: null,
             maxLength: 100,
-            // validate: {
-            //     validator: (url) => {
-            //         return String(url)
-            //             .toLowerCase()
-            //             .match(/^((http|https):\/\/)?[^ "]+$/);
-            //     },
-            //     message: (props) => `${props.value} is not a valid URL!`,
-            // },
         },
         location: {
             type: String,
@@ -125,12 +117,6 @@ userSchema.index({ username: 1, email: 1 }, { unique: true });
 userSchema.index({ username: 1, email: "" }, { unique: true });
 
 
-/**
- *
- * Virtual fields
- *
- */
-
 userSchema.virtual("bookmarks", {
     ref: "Bookmark",
     localField: "_id",
@@ -138,15 +124,8 @@ userSchema.virtual("bookmarks", {
 });
 
 
-/**
- *
- * Middlewares (cascading delete...)
- *
- */
-
 userSchema.pre('save', async function (next) {
 
-    // hash the password if new/modified
     if (!this.isModified('password'))
         return next();
 
@@ -171,22 +150,12 @@ userSchema.pre('findOneAndDelete', async function (next) {
     next();
 });
 
-/**
- *
- * Static methods
- *
- */
 
 userSchema.statics.addUser = async (data) => {
     const user = new User(data);
     return await user.save();
 };
 
-/**
- *
- * Instance methods
- *
- */
 userSchema.methods.addRecrit = function (critId) {
     const isRecrited = this.recrits.some((id) => id === critId);
 
@@ -214,7 +183,6 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 
-// To ensure virtuals are included when you convert a document to JSON
 userSchema.set("toJSON", {
     virtuals: true,
     transform: (doc, { __v, password, ...rest }, options) => rest,

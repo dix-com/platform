@@ -21,11 +21,9 @@ const paginate = async (modelName = null, pipeline = [], options = {}) => {
 
     result = result[0];
 
-    // handle case of an empty object
     if (result.data.length === 1 && Object.keys(result.data).length === 0)
         return { data: [], totalCount: 0, totalPages: 0 };
 
-    // handle case of no data
     if (result.data.length === 0) {
         return { data: [], totalCount: 0, totalPages: 0 };
     }

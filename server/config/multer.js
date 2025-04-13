@@ -3,7 +3,6 @@ const path = require("path");
 const { BadRequestError } = require("../utils/errors");
 
 
-// handle file uploads
 const generateFileName = (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const fileName = uniqueSuffix + path.extname(file.originalname);
@@ -26,7 +25,6 @@ const fileFilter = (req, file, cb) => {
     cb(null, true);
 };
 
-// setup with 5MB file size constraint
 const storage = multer.diskStorage({
     destination: "uploads/",
     filename: generateFileName,

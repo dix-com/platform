@@ -44,16 +44,6 @@ const registerSlice = createSlice({
         }
     },
     extraReducers: (builder) => {
-        // builder.addMatcher(
-        //     authApi.endpoints.checkIdentifier.matchFulfilled,
-        //     (state, { payload }) => {
-        //         state.isAuth = true;
-        //         state.user = payload.data;
-        //     }
-        // );
-        //     // builder.addCase(checkAuth.pending, (state, action) => {
-        //     //     state["auth/checkAuth"] = null;
-        //     // });
     },
 });
 

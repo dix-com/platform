@@ -1,12 +1,3 @@
-/**
- * Generate username based on email, or name
- *
- * @param {string} email
- * @param {string} firstName
- * @param {string} lastName
- *
- * @returns {string} The randomly generated username
- */
 const generateUsername = (email, firstName, lastName, id) => {
     let username = "";
 

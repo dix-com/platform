@@ -198,7 +198,6 @@ const updateUser = asyncHandler(async (req, res, next) => {
     if (req.files["bannerImage"]) {
         updateData.bannerURL = `${process.env.API_URL}/${req.files.bannerImage[0].path}`;
     }
-    // console.log(username)
 
     await User.findByIdAndUpdate(userId, updateData);
 

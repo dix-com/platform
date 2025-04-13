@@ -125,8 +125,8 @@ const verifyToken = asyncHandler(async (req, res, next) => {
 
 const signIn = (req, res, next) => {
     passport.authenticate("local", async (err, user, info) => {
-        if (err) return next(new BadRequestError(info.message)); // local strategy error
-        if (!user) return next(new BadRequestError(info.message)); // no user error
+        if (err) return next(new BadRequestError(info.message));
+        if (!user) return next(new BadRequestError(info.message));
 
 
         if (!user.verified) {
@@ -140,7 +140,7 @@ const signIn = (req, res, next) => {
 
 
         req.logIn(user, (err) => {
-            if (err) return next(new InternalServerError()); // error while establishing session
+            if (err) return next(new InternalServerError());
 
             return res.status(200).json({ isAuthenticated: true });
         });

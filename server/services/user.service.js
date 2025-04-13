@@ -15,12 +15,12 @@ const findByUsername = async (username) => {
     const userAggregation = await User.aggregate([
         {
             $match: { username: username }
-        }, // Match the user by username
+        },
 
         {
             $lookup: {
                 from: "crits",
-                let: { id: "$_id" }, // Assigns the _id of the current document to a variable for use in the sub-pipeline
+                let: { id: "$_id" },
                 pipeline: [
                     {
                         $match: {
@@ -39,7 +39,7 @@ const findByUsername = async (username) => {
                     },
                     { $count: "count" }
                 ],
-                as: "critCount" // Places the count in an array named replies_count in the original document
+                as: "critCount"
             }
         },
 
@@ -88,9 +88,9 @@ const findByUsername = async (username) => {
 
         {
             $lookup: {
-                from: "bookmarks", // Assuming 'bookmarks' is a collection name; adjust as necessary
-                localField: "_id", // Adjust based on your schema
-                foreignField: "user", // Adjust based on your schema
+                from: "bookmarks",
+                localField: "_id",
+                foreignField: "user",
                 as: "bookmarks"
             }
         },
@@ -165,7 +165,7 @@ const findByUsername = async (username) => {
                     $map: {
                         input: "$bookmarks",
                         as: "bookmark",
-                        in: "$$bookmark.crit" // Extract the crit ObjectId from each bookmark
+                        in: "$$bookmark.crit"
                     }
                 },
                 pin: {
@@ -182,7 +182,6 @@ const findByUsername = async (username) => {
         },
     ]);
 
-    // Assuming the aggregation returns an array, you may need to select the first element for a single user object
     const user = userAggregation[0] ? userAggregation[0] : null;
 
     return user;
@@ -211,11 +210,6 @@ const findFromQuery = async (query, options) => {
                     ],
                 },
             },
-            // {
-            //     $project: {
-            //         ...userCritSelector,
-            //     },
-            // },
         ],
         options
     );
@@ -231,7 +225,7 @@ const fetchRecommendedUsers = async (userId, options) => {
             },
             {
                 $lookup: {
-                    from: 'users', // the collection name
+                    from: 'users',
                     localField: '_id',
                     foreignField: 'following',
                     as: 'followedUsers'
@@ -310,7 +304,6 @@ const fetchHomeFeed = async (userId, options) => {
 
             {
                 $project: {
-                    // replies: 1,
                     ...postAuthorSelector,
                     ...postDetailSelector,
                 },
@@ -697,7 +690,6 @@ const fetchFollowers = async (userId, options) => {
             {
                 $unwind: {
                     path: "$follows",
-                    // preserveNullAndEmptyArrays: true,
                 },
             },
 
@@ -724,7 +716,6 @@ const fetchFollowing = async (userId, options) => {
             {
                 $unwind: {
                     path: "$follows",
-                    // preserveNullAndEmptyArrays: true,
                 },
             },
 

@@ -6,15 +6,15 @@ const loggerMiddleware = require("./middlewares/loggerMiddleware");
 const errorHandler = require("./middlewares/errorHandler");
 const routes = require("./routes/index");
 
-const rateLimit = require("express-rate-limit"); // Basic rate-limiting middleware for Express. Use to limit repeated requests to public APIs and/or endpoints such as password reset.
+const rateLimit = require("express-rate-limit");
 
-const helmet = require("helmet"); // Helmet helps you secure your Express apps by setting various HTTP headers. It's not a silver bullet, but it can help!
+const helmet = require("helmet");
 
-const mongoSanitize = require('express-mongo-sanitize'); // This module searches for any keys in objects that begin with a $ sign or contain a ., from req.body, req.query or req.params.
+const mongoSanitize = require('express-mongo-sanitize');
 
-const cors = require("cors"); // CORS is a node.js package for providing a Connect/Express middleware that can be used to enable CORS with various options.
+const cors = require("cors");
 
-const cookieParser = require("cookie-parser"); // Parse Cookie header and populate req.cookies with an object keyed by the cookie names.
+const cookieParser = require("cookie-parser");
 
 
 const app = express();
@@ -23,7 +23,7 @@ app.use(loggerMiddleware);
 
 app.use(
     cors({
-        origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
+        origin: process.env.CLIENT_ORIGIN || "http:
         methods: ["GET", "POST", "DELETE", "PUT", "PATCH"],
         credentials: true,
     })
@@ -32,7 +32,7 @@ app.use(
 app.use(cookieParser());
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Returns middleware that only parses urlencoded bodies
+app.use(express.urlencoded({ extended: true }));
 
 app.use(sessionMiddleware);
 app.use(passport.initialize());
@@ -45,7 +45,7 @@ app.use(helmet({
 
 const limiter = rateLimit({
     max: 3000,
-    windowMs: 60 * 60 * 1000, // In one hour
+    windowMs: 60 * 60 * 1000,
     standardHeaders: true,
     legacyHeaders: false,
     handler: rateLimitHandler

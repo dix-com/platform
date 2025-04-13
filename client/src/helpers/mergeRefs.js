@@ -8,7 +8,6 @@ function mergeRefs(...inputRefs) {
             if (typeof inputRef === 'function') {
                 inputRef(ref);
             } else {
-                // eslint-disable-next-line no-param-reassign
                 inputRef.current = ref;
             }
         });

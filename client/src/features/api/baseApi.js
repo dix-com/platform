@@ -13,7 +13,6 @@ const customBaseQuery =
                 credentials: "include",
             };
 
-            // adjust headers and body based on the request
             if (body && method !== "GET" && method !== "HEAD") {
                 if (body instanceof FormData) {
                     options.body = body;
@@ -23,16 +22,10 @@ const customBaseQuery =
                 }
             }
 
-            // fetches and parses JSON response to an object
             const response = await fetch(baseUrl + url, options);
             const result = await response.json();
 
-            // backend error
             if (result.error) {
-                // user not authenticated
-                // if (result.error.status === 401) {
-                //     return { data: { isAuthenticated: false } };
-                // }
 
                 return {
                     error: {

@@ -11,7 +11,6 @@ const connectDB = async (listener) => {
             .once("open", async () => {
                 const User = mongoose.model("User");
 
-                // create a bot user for showcasing purposes
                 if (!(await User.exists({ username: "XClone" }))) {
                     const adminUser = new User({
                         username: "xclone",
@@ -38,8 +37,6 @@ const connectDB = async (listener) => {
         return mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            // CRITICAL: MongoDB connection pool size for concurrent users
-            // Reducing this will cause "connection limit exceeded" errors!
             maxPoolSize: 100,
         });
     } catch (err) {

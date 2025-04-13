@@ -22,7 +22,7 @@ class ApplicationError extends Error {
 
         this.name = this.constructor.name;
         this.status = status;
-        this.isOperational = isOperational; // default: notify user about the error
+        this.isOperational = isOperational;
 
         Error.captureStackTrace(this, this.constructor);
     }

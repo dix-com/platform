@@ -8,10 +8,6 @@ export const authApi = baseApi.injectEndpoints({
                 url: "/auth/me",
             }),
             providesTags: ["Auth"],
-            // async onQueryStarted(arg, { queryFulfilled }) {
-            //     await queryFulfilled
-            //     socketClient.connect();
-            // },
         }),
         signIn: builder.mutation({
             query: ({ identifier, password }) => ({
@@ -44,12 +40,7 @@ export const authApi = baseApi.injectEndpoints({
                 url: "/auth/logout",
             }),
             async onCacheEntryAdded(arg, { dispatch, cacheDataLoaded }) {
-                // const isAuth = (await cacheDataLoaded).data?.isAuthenticated;
 
-                // if (!isAuth) {
-                //     socketClient.disconnect();
-                //     dispatch(baseApi.util.resetApiState());
-                // }
             },
         }),
         identifierExists: builder.query({

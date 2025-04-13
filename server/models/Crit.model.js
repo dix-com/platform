@@ -80,7 +80,6 @@ const critSchema = new Schema(
     { timestamps: true }
 );
 
-// critSchema.index({author: 1, hashtags: 1});
 
 
 critSchema.methods.updateRepliesCount = async function () {
@@ -112,13 +111,6 @@ critSchema.methods.deleteRecrit = function (userId) {
 
     return Promise.resolve(this);
 };
-
-/**
- *
- * Middleware
- *
- */
-
 
 critSchema.pre("deleteOne", { document: true, query: false }, async function (next) {
     const Crit = this.model('Crit');

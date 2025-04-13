@@ -253,7 +253,6 @@ const createCrit = asyncHandler(async (req, res, next) => {
         quoteTo,
     };
 
-    // Check the crit type
     if (replyTo && quoteTo)
         return next(new ForbiddenError("Crit can't be both a reply and a quote!"));
 
@@ -263,7 +262,6 @@ const createCrit = asyncHandler(async (req, res, next) => {
     if (replyTo && !(await Crit.exists({ _id: replyTo })))
         return next(new NotFoundError("Crit being replied to is not found!"));
 
-    // Attach incoming files
     if (req.file) {
         const dimensions = sizeOf(req.file.path)
 
@@ -308,7 +306,6 @@ const deleteCrit = asyncHandler(async (req, res, next) => {
         return next(new ForbiddenError("You are not authorized to delete this crit!"));
 
     await crit.deleteOne();
-    // await Crit.findByIdAndRemove(critId);
 
     return res.status(200).json({
         isCritDeleted: true,

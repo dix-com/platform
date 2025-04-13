@@ -35,11 +35,9 @@ module.exports = new GoogleStrategy(
                     profileImageURL,
                 }
 
-                // create the google user
                 return cb(null, await authService.createGoogleUser(data));
             }
 
-            // users exists with a different provider
             if (user.provider?.providerName != "google") {
                 return cb(null, false, {
                     message: `You have previously signed up with a different sign-in method`,
