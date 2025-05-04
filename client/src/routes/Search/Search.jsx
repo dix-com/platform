@@ -1,7 +1,4 @@
-
-import { useNavigate, useSearchParams } from "react-router-dom";
-
-import withQuery from "../../hoc/withQuery"
+import { useSearchParams } from "react-router-dom";
 
 import { useGetSearchUsersQuery } from "../../features/api/userApi";
 import { useGetSearchCritsQuery } from "../../features/api/critApi";
@@ -14,84 +11,71 @@ import {
     UserPreview,
     CritPreview,
     Placeholder,
-    PaginatedTabList,
+    TabList,
+    TabPanel,
     Trending,
     Connect,
-    Links
+    Links,
+    SearchBar
 } from '../../components';
-import { useEffect } from "react";
 
-const CritList = withQuery(useGetSearchCritsQuery)(PaginatedList);
-const PeopleList = withQuery(useGetSearchUsersQuery)(PaginatedList);
 
 const Search = () => {
-    const navigate = useNavigate();
-
     const [searchParams] = useSearchParams();
     const query = searchParams.get('q');
 
-    useEffect(() => {
-        if (!query || query.length === 0) {
-            navigate('/')
-        }
-    }, [query])
-
-
-    const renderPanel = (currTab) => {
-        switch (currTab) {
-            case 'crits':
-                return (
-                    <CritList
-                        component={CritPreview}
-                        renderPlaceholder={() => (
-                            <Placeholder
-                                title="No results found"
-                                subtitle="Try searching again with another query!"
-                            />
-                        )}
-                        args={{ searchQuery: query }}
-                    />
-                )
-            case 'people':
-                return (
-                    <PeopleList
-                        component={UserPreview}
-                        renderPlaceholder={() => (
-                            <Placeholder
-                                title="No results found"
-                                subtitle="Try searching again with another query!"
-                            />
-                        )}
-                        args={{ searchQuery: query }}
-
-                    />
-                )
-            default:
-                break;
-        }
-    }
-
     return (
         <main>
-
             <MiddleColumn>
                 <ColumnHeader
-                    routerBack={true}
                     className="search-route_header"
+                    routerBack={true}
                 >
                     <h1>Search</h1>
                 </ColumnHeader>
 
-                <PaginatedTabList
+                <TabList
                     options={{
                         tabs: ["crits", "people"],
                         index: `/search`,
                     }}
-                    renderPanel={renderPanel}
-                />
+                >
+                    <TabPanel name="crits">
+                        <PaginatedList
+                            queryHook={useGetSearchCritsQuery}
+                            args={{ searchQuery: query }}
+                            renderItem={(data) =>
+                                <CritPreview crit={data} />
+                            }
+                            renderPlaceholder={() => (
+                                <Placeholder
+                                    title="No results found"
+                                    subtitle="Try searching again with another query!"
+                                />
+                            )}
+                        />
+                    </TabPanel>
+
+                    <TabPanel name="people">
+                        <PaginatedList
+                            queryHook={useGetSearchUsersQuery}
+                            args={{ searchQuery: query }}
+                            renderItem={(data) =>
+                                <UserPreview user={data} />
+                            }
+                            renderPlaceholder={() => (
+                                <Placeholder
+                                    title="No results found"
+                                    subtitle="Try searching again with another query!"
+                                />
+                            )}
+                        />
+                    </TabPanel>
+                </TabList>
             </MiddleColumn>
 
             <LeftColumn>
+                <SearchBar />
                 <Trending />
                 <Connect />
                 <Links />
