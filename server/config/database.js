@@ -37,7 +37,7 @@ const connectDB = async (listener) => {
         return mongoose.connect(process.env.MONGO_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            maxPoolSize: 100,
+            maxPoolSize: 1,
         });
     } catch (err) {
         console.error(err);
