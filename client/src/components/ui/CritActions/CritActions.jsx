@@ -1,27 +1,51 @@
 import "./styles.css";
 
-import { useState } from "react";
-import { IconContext } from "react-icons";
+import { toast } from "react-hot-toast";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
-import { PiPencilSimpleLine } from "react-icons/pi";
+import { TbPencilMinus } from "react-icons/tb";
 import { LuRepeat2 } from "react-icons/lu";
 import { TbMessageCircle2, TbShare2 } from "react-icons/tb";
 import { IoMdStats } from "react-icons/io";
 import { BiBookmark, BiSolidBookmark } from "react-icons/bi";
+import { AiOutlineLink } from "react-icons/ai";
 
-import { LinkButton, FloatOptions } from "../../index"
+import useModal from "../../../hooks/useModal";
+
+import { useAppDispatch } from "../../../app/store";
+import { modalActions } from "../../../features/slices/modalSlice";
+
+import {
+    useCreateRepostMutation,
+    useDeleteRepostMutation,
+} from "../../../features/api/userApi";
+
+import {
+    useCreateBookmarkMutation,
+    useDeleteBookmarkMutation
+} from "../../../features/api/bookmarkApi";
 
 import {
     useLikeCritMutation,
     useUnlikeCritMutation,
-    useCreateRepostMutation,
-    useDeleteRepostMutation,
-    useCreateBookmarkMutation,
-    useDeleteBookmarkMutation,
-} from "../../../features/api/userApi";
+} from "../../../features/api/critApi";
 
-const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
-    const [recritFloat, setRecritFloat] = useState(false);
+import { LinkButton, Float } from "../../index"
+
+
+const CritActions = ({ crit, currentUser }) => {
+    const {
+        isOpen: isRepostFloatOpen,
+        open: openRepostFloat,
+        close: closeRepostFloat
+    } = useModal();
+
+    const {
+        isOpen: isShareFloatOpen,
+        open: openShareFloat,
+        close: closeShareFloat
+    } = useModal();
+
+    const dispatch = useAppDispatch();
 
     const [createRepost] = useCreateRepostMutation();
     const [deleteRepost] = useDeleteRepostMutation();
@@ -34,6 +58,7 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
     const isReposted = crit.recrits.includes(currentUser._id);
     const isLiked = crit.likes.includes(currentUser._id);
 
+
     const handleRecrit = async (e) => {
         const recritResult = isReposted
             ? await deleteRepost({ critId: crit._id })
@@ -45,19 +70,19 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
             (isReposted && !recritResult.data?.isReposted) ||
             (!isReposted && recritResult.data?.isReposted)
         )
-            closeRecritFloat();
+            closeRepostFloat();
     };
 
     const handleLike = async (e) => {
         isLiked
-            ? await unlikeCrit({ id: crit._id })
-            : await likeCrit({ id: crit._id });
+            ? await unlikeCrit({ id: crit._id, userId: currentUser._id })
+            : await likeCrit({ id: crit._id, userId: currentUser._id });
     };
 
     const handleBookmark = async () => {
         const bookmarkData = {
             critId: crit._id,
-            userId: currentUser.id,
+            userId: currentUser._id,
         };
 
         isBookmarked
@@ -66,14 +91,18 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
     };
 
 
-    const openRecritFloat = () => setRecritFloat(true);
-    const closeRecritFloat = () => setRecritFloat(false);
-
     return (
         <div className="crit-actions">
             <LinkButton
                 className={`action-btn reply blue_round-btn`}
-                onClick={openReplyModal}
+                onClick={() => dispatch(
+                    modalActions.openModal({
+                        name: "ReplyModal",
+                        props: { replyingTo: crit }
+                    })
+                )}
+                data-tooltip-id="action-tooltip"
+                data-tooltip-content="Reply"
             >
                 <div className="icon-container">
                     <TbMessageCircle2 className="icon" />
@@ -84,62 +113,90 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
                 </div>
             </LinkButton>
 
-            <LinkButton
-                className={`action-btn recrit green_round-btn ${isReposted && "applied"}`}
-                onClick={openRecritFloat}
-            >
-                <div className="icon-container">
-                    <LuRepeat2 className="icon" />
-                </div>
-
-                <div className="count-container">
-                    <span>{crit.recrits.length}</span>
-                </div>
-
-                {recritFloat && (
-                    <IconContext.Provider
-                        value={{ className: "float-icon" }}
-                    >
-                        <FloatOptions
-                            isOpen={recritFloat}
-                            onClose={closeRecritFloat}
-                            className="recrit-options"
+            <Float
+                isOpen={isRepostFloatOpen}
+                open={openRepostFloat}
+                close={closeRepostFloat}
+                className="recrit-options"
+                positions={["bottom", "right"]}
+                renderContent={() => (
+                    <>
+                        <LinkButton
+                            type="button"
+                            className="float-btn"
+                            onClick={handleRecrit}
                         >
-                            <LinkButton
-                                type="button"
-                                className="float-btn"
-                                onClick={handleRecrit}
-                            >
-                                <div className="float-icon-container">
-                                    <LuRepeat2 />
-                                </div>
+                            <div className="float-icon-container">
+                                <LuRepeat2
+                                    size="28"
+                                    className="float-icon"
+                                />
+                            </div>
 
+                            <p style={{ display: "block", width: "auto" }}>
                                 {isReposted ? "Undo Repost" : "Repost"}
-                            </LinkButton>
+                            </p>
+                        </LinkButton>
 
-                            <LinkButton
-                                type="button"
-                                className="float-btn"
-                                onClick={openQuoteModal}
-                            >
-                                <div className="float-icon-container">
-                                    <PiPencilSimpleLine size="21" />
-                                </div>
+                        <LinkButton
+                            type="button"
+                            className="float-btn"
+                            onClick={() => dispatch(
+                                modalActions.openModal({
+                                    name: "CritModal",
+                                    props: { quote: crit, placeholder: "Add a comment" }
+                                })
+                            )}
+                        >
+                            <div className="float-icon-container">
+                                <TbPencilMinus
+                                    size="28"
+                                    className="float-icon"
+                                />
+                            </div>
+
+                            <p style={{ display: "block", width: "auto" }}>
                                 Quote
-                            </LinkButton>
-                        </FloatOptions>
-                    </IconContext.Provider>
+                            </p>
+
+                        </LinkButton>
+                    </>
                 )}
-            </LinkButton>
+            >
+                <button
+                    className={`action-btn recrit green_round-btn ${isReposted && "applied"}`}
+                    data-tooltip-id="action-tooltip"
+                    data-tooltip-content="Repost"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openRepostFloat();
+                    }}
+                >
+                    <div className="icon-container">
+                        <LuRepeat2 className="icon" />
+                    </div>
+
+                    <div className="count-container">
+                        <span>{crit.recrits.length}</span>
+                    </div>
+                </button>
+            </Float>
 
             <LinkButton
                 type="button"
                 className={`action-btn like red_round-btn ${isLiked && "applied"}`}
                 data-type="inner-button"
                 onClick={handleLike}
+                data-tooltip-id="action-tooltip"
+                data-tooltip-content={isLiked ? "Unlike" : "Like"}
             >
                 <div className="icon-container">
-                    {isLiked ? <AiFillHeart className="icon" /> : <AiOutlineHeart className="icon" />}
+                    {isLiked ? (
+                        <AiFillHeart className="icon" />
+                    ) : (
+                        <AiOutlineHeart className="icon" />
+                    )}
                 </div>
 
                 <div className="count-container">
@@ -149,6 +206,8 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
 
             <LinkButton
                 className="action-btn view blue_round-btn"
+                data-tooltip-id="action-tooltip"
+                data-tooltip-content="View"
                 disabled
             >
                 <div className="icon-container">
@@ -163,8 +222,10 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
             <div className="crit-actions-container">
                 <LinkButton
                     type="button"
-                    className="action-btn bookmark blue_round-btn"
+                    className={`action-btn blue_round-btn bookmark ${isBookmarked && "applied"}`}
                     onClick={handleBookmark}
+                    data-tooltip-id="action-tooltip"
+                    data-tooltip-content={isBookmarked ? "Remove from Bookmarks" : "Bookmark"}
                 >
                     <div className="icon-container">
                         {isBookmarked ? (
@@ -175,16 +236,53 @@ const CritActions = ({ crit, currentUser, openReplyModal, openQuoteModal }) => {
                     </div>
                 </LinkButton>
 
-                <LinkButton
-                    className="action-btn crit-btn blue_round-btn"
-                    disabled
+                <Float
+                    isOpen={isShareFloatOpen}
+                    close={closeShareFloat}
+                    className="share-float"
+                    positions={["bottom"]}
+                    renderContent={() => (
+                        <>
+                            <LinkButton
+                                type="button"
+                                className="float-btn"
+                                onClick={() => {
+                                    navigator.clipboard.writeText("XD");
+                                    toast.success(
+                                        () => <span>Link copied to clipboard.</span >,
+                                        { duration: 6000 }
+                                    );
+                                }}
+                            >
+                                <div className="float-icon-container">
+                                    <AiOutlineLink
+                                        size="28"
+                                        className="float-icon"
+                                    />
+                                </div>
+
+                                Copy link
+                            </LinkButton>
+                        </>
+                    )}
                 >
-                    <div className="icon-container">
-                        <TbShare2 className="icon" />
-                    </div>
-                </LinkButton>
+                    <button
+                        className="action-btn crit-btn blue_round-btn"
+                        data-tooltip-id="action-tooltip"
+                        data-tooltip-content="Share"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openShareFloat();
+                        }}
+                    >
+                        <div className="icon-container">
+                            <TbShare2 className="icon" />
+                        </div>
+                    </button>
+                </Float>
             </div>
-        </div>
+        </div >
     )
 }
 

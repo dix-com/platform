@@ -1,12 +1,13 @@
 .crit {
     display: flex;
+    flex-direction: column;
     position: relative;
-    /* padding: 0.75rem 1rem; */
     padding: 0.65rem 1rem;
-    border-top: 1px solid var(--border);
+    /* border-top: 1px solid var(--border); */
     border-bottom: 1px solid var(--border);
     width: 100% !important;
     cursor: pointer;
+    overflow: hidden;
 }
 
 .crit .crit-actions .action-btn .icon-container {
@@ -14,12 +15,18 @@
     height: 17px;
 }
 
-.crit:hover {
+.crit:hover,
+.crit:active {
     background-color: var(--crit-hover);
 }
 
+.crit-wrapper {
+    display: flex;
+    width: 100%;
+}
+
 .crit .pfp-container {
-    padding: 0rem 0.75rem 0 0;
+    margin-right: 0.75rem;
 }
 
 .crit .pfp-container .pfp {
@@ -30,7 +37,8 @@
 .crit .crit-container {
     display: flex;
     flex-direction: column;
-    width: 90%;
+    width: 80%;
+    flex-grow: 1;
 }
 
 .crit .crit-container .quote-preview {
@@ -47,12 +55,13 @@
 .crit-content .crit-text {
     font-size: 0.9375rem;
     font-weight: 500;
-    /* display: block; */
     word-wrap: break-word;
+    /* word-break: break-all; */
+    /* overflow-wrap: break-word; */
 }
 
-.crit-text p {
-    width: 100%;
+.crit-text span {
+    word-wrap: break-word;
 }
 
 .crit-btn {
@@ -152,12 +161,12 @@
 }
 
 .float-icon-container {
-    width: 18px !important;
-    height: 18px !important;
+    width: 20px !important;
+    height: 20px !important;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-right: 0.75rem;
+    margin-right: 0.5rem;
 }
 
 .float-icon-container .float-icon {
@@ -166,19 +175,43 @@
     stroke-width: 2px;
 }
 
-.crit .replyingTo {
+.crit .special-info {
     color: var(--grey);
     margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
+    margin-left: 1.7rem;
 }
 
-.crit .replyingTo-icon {
+.crit .special-info-icon {
     margin-right: 0.25rem;
 }
 
-.crit .replyingTo,
-.crit .replyingTo a {
-    font-size: 0.95rem;
-    font-weight: 500;
+.special-info.pin .special-info-icon {
+    fill: var(--grey);
+}
+
+.crit .special-info,
+.crit .special-info a {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.crit .special-info a {
+    margin-left: 0.25rem;
+}
+
+.replyingTo {
+    display: flex;
+    margin-bottom: 0.25rem;
+}
+
+.replyingTo p {
+    color: var(--grey);
+    margin-right: 0.25rem;
+}
+
+.replyingTo p,
+.replyingTo a {
+    font-size: 0.9375rem;
 }

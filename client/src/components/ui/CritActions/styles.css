@@ -23,50 +23,58 @@
     position: relative;
 }
 
-.crit-actions .action-btn .recrit-options {
-    top: -10px !important;
-    left: -10px !important;
-    width: 135px !important;
+.recrit-options {
+    width: unset !important;
 }
 
-.crit-actions .action-btn .recrit-options .float-icon-container {
-    width: 30px !important;
-}
-
-.action-btn .count-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 30px;
-}
-
-.action-btn .count-container span {
-    padding: 0 0.75rem;
-}
-
-.reply.applied .icon,
-.reply.applied span,
-.reply:hover span,
-.view.applied .icon,
-.view.applied span,
-.view:hover span {
-    color: var(--primary-colour) !important;
-}
-
-.recrit.applied .icon,
-.recrit.applied span,
-.recrit:hover span {
-    color: var(--recrit) !important;
-}
-
-.like.applied .icon,
-.like.applied span,
-.like:hover span {
-    color: var(--like) !important;
+.crit-actions .action-btn .recrit-option .float-btn p {
+    flex: 1;
 }
 
 .action-btn .count-container {
     font-size: 0.8rem;
     font-weight: 500;
     color: var(--grey);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+}
+
+.action-btn .count-container span {
+    padding-left: 0.3rem;
+    transition: all 0.2s;
+}
+
+.reply.applied .icon,
+.reply.applied span,
+.reply:hover span,
+.reply:active span,
+.view.applied .icon,
+.view.applied span,
+.view:hover span,
+.view:active span {
+    color: var(--primary-colour) !important;
+}
+
+.recrit.applied .icon,
+.recrit.applied span,
+.recrit:hover span,
+.recrit:active span {
+    color: var(--recrit) !important;
+}
+
+.like.applied .icon,
+.like.applied span,
+.like:hover span,
+.like:active span {
+    color: var(--like) !important;
+}
+
+.bookmark.applied .icon {
+    color: var(--primary-colour);
+}
+
+.share-float {
+    width: auto;
 }
