@@ -1,12 +1,12 @@
 import "./styles.css";
 
 import { Link, useLocation } from "react-router-dom";
+import { PfpContainer } from "../../index";
 import { isObjEmpty } from "../../../utils/object";
 import { getTimeDifference } from "../../../helpers/date";
 
 const QuotePreview = ({ crit }) => {
     const { pathname } = useLocation();
-
 
     const isReply = crit.replyTo && !isObjEmpty(crit.replyTo);
     const formattedDate = getTimeDifference(crit.createdAt);
@@ -16,19 +16,13 @@ const QuotePreview = ({ crit }) => {
         <Link
             to={`/${crit.author.username}/status/${crit._id}`}
             state={{ previousPath: pathname }}
-            className="quote-preview"
+            className="quote-preview flex-truncate_parent"
         >
-            <div className="details-wrapper">
-                <div className="pfp-container">
-                    <img
-                        src={crit.author.profileImageURL}
-                        className="pfp"
-                        alt="User Pfp"
-                    />
-                </div>
+            <div className="details-wrapper flex-truncate_parent">
+                <PfpContainer src={crit.author.profileImageURL} />
 
                 <Link
-                    className="display_name"
+                    className="display_name flex-truncate_child"
                     to={`/${crit.author.username}`}
                 >
                     {crit.author.displayName}
