@@ -90,7 +90,6 @@ const CritActions = ({ crit, currentUser }) => {
             : await createBookmark(bookmarkData);
     };
 
-
     return (
         <div className="crit-actions">
             <LinkButton
@@ -247,7 +246,7 @@ const CritActions = ({ crit, currentUser }) => {
                                 type="button"
                                 className="float-btn"
                                 onClick={() => {
-                                    navigator.clipboard.writeText("XD");
+                                    navigator.clipboard.writeText(`${process.env.REACT_APP_CLIENT_ORIGIN}/${crit.author.username}/status/${crit._id}`);
                                     toast.success(
                                         () => <span>Link copied to clipboard.</span >,
                                         { duration: 6000 }
@@ -260,7 +259,6 @@ const CritActions = ({ crit, currentUser }) => {
                                         className="float-icon"
                                     />
                                 </div>
-
                                 Copy link
                             </LinkButton>
                         </>
