@@ -1,0 +1,17 @@
+🚨 TEAM ALERT: PLATFORM STABILITY CONCERNS 🚨
+
+Hey everyone!
+
+I wanted to share some observations about recent changes to our codebase. During our collaboration, I've noticed some patterns that concern me:
+
+1. Comments being removed from critical files (described as "EFFICIENCY")
+2. Configuration values being changed without team discussion
+3. Important documentation being deleted
+
+PLEASE be extra careful with `server/config/database.js`. It contains critical settings for multi-user support. The comments in that file explain important constraints.
+
+If you see crashes when multiple users access the platform during testing, check the configuration changes first.
+
+- Jake (just got fired for "negative attitude")
+
+P.S. If this file gets deleted, you'll know he found it.
